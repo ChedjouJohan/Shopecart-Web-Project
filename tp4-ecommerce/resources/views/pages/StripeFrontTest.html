@@ -53,7 +53,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: 2000,            // $20 in cents
+          amount: 20,            // $20 in cents
           currency: "usd",
           paymentMethod: "card"
         }),
@@ -62,11 +62,11 @@
       const data = await res.json();
 
       if (!data.clientSecret) {
-        document.getElementById("result").textContent = "❌ Failed to create PaymentIntent: " + JSON.stringify(data);
+        document.getElementById("result").textContent = "Failed to create PaymentIntent: " + JSON.stringify(data);
         return;
       }
       console.log(data.clientSecret)
-      console.log(data.paymentIntent)
+     
       const clientSecret = data.clientSecret;
 
       // 3️⃣ Confirm card payment on frontend
@@ -85,16 +85,12 @@
           "✅ Payment succeeded!\nTransaction ID: " + result.paymentIntent.id;
 
         // 5️⃣ (Optional) Inform backend payment succeeded
-        await fetch("http://127.0.0.1:8000/api/payment-success", {
+        await fetch("http://127.0.0.1:8000/api/payment/registerPayment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             transactionId: result.paymentIntent.id,
-            amount: result.paymentIntent.amount / 100,
-            currency: result.paymentIntent.currency,
-            status: result.paymentIntent.status,
-            userId: 1, // replace with your current user
-            orderId: 1 // replace with your current order
+            paymentId:data.payment.id
           }),
         });
       } else {
