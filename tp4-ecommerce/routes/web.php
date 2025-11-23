@@ -21,6 +21,14 @@ Route::get('/', function () {
     return view('home');;
 });
 
-Route::get('/Blog.html', function () {
-    return view('blog');;
-});
+
+
+// Pages Blade
+Route::view('/login', 'auth.login')->name('login');
+Route::view('/register', 'auth.register')->name('register');
+Route::view('/cart', 'cart')->name('cart');
+Route::view('/about', 'about')->name('about');
+Route::view('/account', 'account')->name('account');
+Route::view('/blog', 'blog')->name('blog');
+
+
