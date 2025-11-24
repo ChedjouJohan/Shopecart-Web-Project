@@ -14,6 +14,15 @@ return new class extends Migration
         Schema::create('product_variants', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+          
+            $table->string("image");
+            $table->integer("stock");
+            $table->float("price");
+            $table->string("color");
+
+            $table->foreignId("productId")
+                ->references("id")
+                ->on("products");
         });
     }
 

@@ -1379,6 +1379,135 @@
                 ]
             }
         },
+        "/api/payment/create-payment-intent/order/{orderId}": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Create a Stripe PaymentIntent and local payment record",
+                "operationId": "e90c50d0903f6a87baf44a1212373499",
+                "parameters": [
+                    {
+                        "name": "orderId",
+                        "in": "path",
+                        "description": "ID of the order linked to this payment",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "amount",
+                                    "paymentMethod"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "type": "number",
+                                        "example": 25.5
+                                    },
+                                    "paymentMethod": {
+                                        "type": "string",
+                                        "example": "card"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "PaymentIntent created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "clientSecret": {
+                                            "type": "string",
+                                            "example": "pi_12345_secret_abc"
+                                        },
+                                        "payment": {
+                                            "type": "object",
+                                            "example": {
+                                                "id": 10,
+                                                "amount": 25.5,
+                                                "paymentMethod": "card",
+                                                "transactionId": null,
+                                                "status": "PENDING"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/payment/registerPayment": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Register the transaction id of a payment",
+                "operationId": "14c010e1a7b269b2e9ba9601989560da",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "paymentId",
+                                    "transactionId"
+                                ],
+                                "properties": {
+                                    "paymentId": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "transactionId": {
+                                        "type": "string",
+                                        "example": "pi_3Xx123abc"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Payment completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "Payment completed"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "Payment does not exists"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/products": {
             "post": {
                 "tags": [
@@ -2774,6 +2903,10 @@
         {
             "name": "CartItem",
             "description": "CartItem"
+        },
+        {
+            "name": "Payments",
+            "description": "Payments"
         },
         {
             "name": "Products",

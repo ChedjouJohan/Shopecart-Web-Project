@@ -12,5 +12,6 @@ class Payment extends Model
         'paymentMethod',
         'status',
         'transactionId',
+        "amount",
     ];
 }

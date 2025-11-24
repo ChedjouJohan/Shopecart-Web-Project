@@ -21,26 +21,14 @@ Route::get('/', function () {
     return view('home');;
 });
 
-Route::get('/Blog.html', function () {
-    return view('blog');;
-});
 
-Route::get('/articles/article1.html', function () {
-    return view('articles.article1');
-});
 
-Route::get('/articles/article2.html', function () {
-    return view('articles.article2');
-});
-Route::get('/articles/article3.html', function () {
-    return view('articles.article3');
-});
-Route::get('/articles/article4.html', function () {
-    return view('articles.article4');
-});
-Route::get('/articles/article5.html', function () {
-    return view('articles.article5');
-});
-Route::get('/articles/article6.html', function () {
-    return view('articles.article6');
-});
+// Pages Blade
+Route::view('/login', 'auth.login')->name('login');
+Route::view('/register', 'auth.register')->name('register');
+Route::view('/cart', 'cart')->name('cart');
+Route::view('/about', 'about')->name('about');
+Route::view('/account', 'account')->name('account');
+Route::view('/blog', 'blog')->name('blog');
+
+
