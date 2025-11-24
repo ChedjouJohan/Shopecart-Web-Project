@@ -12,12 +12,13 @@
   <script src="{{ asset('assets/js/header.js') }}"></script>
 <script defer src="{{ asset('assets/js/newsletter.js') }}"></script>
 <script src="{{ asset('assets/js/Blog.js') }}"></script>
-
-  <!-- Utilisation de Font Awesome pour les icônes -->
+ <!-- Utilisation de Font Awesome pour les icônes -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inria+Serif&display=swap');
   </style>
+ 
+  <script src="/assets/js/header.js"></script>
 </head>
 
 <body>
@@ -33,21 +34,20 @@
         </div>
         <span class="logo-text">Shopcart</span>
       </div>
-
       <!-- Hamburger icon comme label pour la checkbox -->
-      <label for="menu-toggle" class="hamburger">
+      <label for="menu-toggle" class="hamburger" id="hamburger">
         <span></span>
         <span></span>
         <span></span>
       </label>
 
-      <ul class="nav-links">
+      <ul class="nav-links" id="navLinks">
         <li class="categories-dropdown">
-          <!-- Checkbox pour le sous-menu des catégories -->
-          <label for="categories-toggle">
+          <!-- Label pour le sous-menu des catégories -->
+          <label for="categories-toggle" class="categories-label" id="categoriesLabel">
             Catégories <span class="dropdown-arrow">▼</span>
           </label>
-          <div class="dropdown-content">
+          <div class="dropdown-content" id="dropdownContent">
             <a href="/pages/products_ordi.html"><i class="fas fa-laptop"></i> Ordinateurs portables</a>
             <a href="/pages/products_tel.html"><i class="fas fa-mobile-alt"></i> Téléphones</a>
             <a href="/pages/product_casque.html"><i class="fas fa-headphones"></i> Casques & Écouteurs</a>
@@ -65,21 +65,37 @@
         <li><a href="/Blog.html">Blog</a></li>
       </ul>
 
-      <div class="search-bar">
+      <div class="search-bar" id="searchBar">
         <input type="text" placeholder="Rechercher un produit..." class="search-input">
       </div>
 
-      <div class="user-actions">
-        <a href="/account.html" class="account-icon"><i class="fa-regular fa-user"></i> <span>Mon Compte</span></a>
-        <a href="/panier.html" class="cart-icon"><i class="fas fa-shopping-cart"></i> <span>Panier</span> <span
-            class="cart-count">3</span></a>
+      <div class="user-actions" id="userActions">
+        <!-- Bouton conditionnel Mon compte / Se connecter -->
+        <a href="/account.html" class="account-icon" id="accountButton" style="display: none;">
+          <i class="fa-regular fa-user"></i> <span>Mon Compte</span>
+        </a>
+        <a href="/login.html" class="account-icon" id="loginButton" style="display: none;">
+          <i class="fa-regular fa-user"></i> <span>Se connecter</span>
+        </a>
+
+        <a href="/panier.html" class="cart-icon">
+          <i class="fas fa-shopping-cart"></i> <span>Panier</span>
+          <span class="cart-count"></span>
+        </a>
+
+        <!-- Dark Mode Toggle amélioré -->
+        <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Basculer le mode sombre">
+          <i class="fas fa-moon"></i>
+          <i class="fas fa-sun"></i>
+          <span class="dark-mode-text">Mode sombre</span>
+        </button>
+      </div>
       </div>
     </nav>
 
     <!-- Overlay pour fermer le menu (utilise l'ancre) -->
     <a href="#" class="overlay" id="overlay"></a>
   </header>
-
    <!-- Contenu principal du Blog -->
   <main class="blog-container">
     <!-- Hero Section -->
@@ -98,96 +114,119 @@
     
     <!-- Grille des articles -->
     <section class="articles">
-      
       <!-- Article 5 -->
-      <article class="card">
-        <img src="/assets/images/femmecasque.jpg" alt="Femme avec casque audio">
-        <div class="card-content">
-          <span class="card-category">Tech & Lifestyle</span>
-          <h2><a href="/articles/article5.html">Avec nos amis électroniques</a></h2>
-          <p>Les appareils électroniques sont devenus des acteurs incontournables dans notre vie quotidienne. Découvrez comment ils nous aident au quotidien...</p>
-          <div class="card-meta">
-            <span><i class="far fa-clock"></i> 5 min</span>
-            <span><i class="far fa-calendar"></i> 2 Oct 2025</span>
-          </div>
-          <a class="read-more" href="/articles/article5.html">Lire l'article</a>
+    <article class="card">
+      <img src="/assets/images/femmecasque.jpg" alt="Femme avec casque audio">
+      <div class="card-content">
+        <span class="card-category">Tech & Lifestyle</span>
+        <h2><a href="/articles/article5.html">Avec nos amis électroniques</a></h2>
+        <p>Les appareils électroniques sont devenus des acteurs incontournables...</p>
+        <div class="card-meta">
+          <span><i class="far fa-clock"></i> 5 min</span>
+          <span><i class="far fa-calendar"></i> 2 Oct 2025</span>
+          <button class="like-btn" data-article-id="5">
+            <i class="far fa-heart"></i>
+            <span class="like-count"></span>
+          </button>
         </div>
-      </article>
+        <a class="read-more" href="/articles/article5.html">Lire l'article</a>
+      </div>
+    </article>
 
-      <!-- Article 3 -->
-      <article class="card">
-        <img src="/assets/images/laptopcamera.jpg" alt="Laptop et caméra">
-        <div class="card-content">
-          <span class="card-category">Photographie</span>
-          <h2><a href="/articles/article3.html">Les créateurs de souvenirs</a></h2>
-          <p>Afin de capturer les moments qui comptent, notre gamme de caméras est disponible pour vous accompagner partout...</p>
-          <div class="card-meta">
-            <span><i class="far fa-clock"></i> 7 min</span>
-            <span><i class="far fa-calendar"></i> 28 Sep 2025</span>
-          </div>
-          <a class="read-more" href="/articles/article3.html">Lire l'article</a>
+    <!-- Article 3 -->
+    <article class="card">
+      <img src="/assets/images/laptopcamera.jpg" alt="Laptop et caméra">
+      <div class="card-content">
+        <span class="card-category">Photographie</span>
+        <h2><a href="/articles/article3.html">Les créateurs de souvenirs</a></h2>
+        <p>Afin de capturer les moments qui comptent...</p>
+        <div class="card-meta">
+          <span><i class="far fa-clock"></i> 7 min</span>
+          <span><i class="far fa-calendar"></i> 28 Sep 2025</span>
+          <button class="like-btn" data-article-id="3">
+            <i class="far fa-heart"></i>
+            <span class="like-count"></span>
+          </button>
         </div>
-      </article>
-      
-      <!-- Article 4 -->
-      <article class="card">
-        <img src="/assets/images/bazar.jpg" alt="Appareils électroniques variés">
-        <div class="card-content">
-          <span class="card-category">Guide d'Achat</span>
-          <h2><a href="/articles/article4.html">Comment choisir ses appareils indispensables ?</a></h2>
-          <p>Les critères essentiels pour ne pas se tromper lors de l'achat de vos appareils électroniques. Notre guide complet...</p>
-          <div class="card-meta">
-            <span><i class="far fa-clock"></i> 10 min</span>
-            <span><i class="far fa-calendar"></i> 25 Sep 2025</span>
-          </div>
-          <a class="read-more" href="/articles/article4.html">Lire l'article</a>
-        </div>
-      </article>
+        <a class="read-more" href="/articles/article3.html">Lire l'article</a>
+      </div>
+    </article>
 
-      <!-- Article 2 -->
-      <article class="card">
-        <img src="/assets/images/desktopjeuenligne.jpg" alt="Setup gaming">
-        <div class="card-content">
-          <span class="card-category">Gaming</span>
-          <h2><a href="/articles/article2.html">Le divertissement sans limite</a></h2>
-          <p>Les outils électroniques ne sont pas qu'à but professionnel, ils laissent aussi place à l'amusement et au gaming...</p>
-          <div class="card-meta">
-            <span><i class="far fa-clock"></i> 6 min</span>
-            <span><i class="far fa-calendar"></i> 20 Sep 2025</span>
-          </div>
-          <a class="read-more" href="/articles/article2.html">Lire l'article</a>
+    <!-- Article 4 -->
+    <article class="card">
+      <img src="/assets/images/bazar.jpg" alt="Appareils électroniques variés">
+      <div class="card-content">
+        <span class="card-category">Guide d'Achat</span>
+        <h2><a href="/articles/article4.html">Comment choisir ses appareils indispensables ?</a></h2>
+        <p>Les critères essentiels pour ne pas se tromper...</p>
+        <div class="card-meta">
+          <span><i class="far fa-clock"></i> 10 min</span>
+          <span><i class="far fa-calendar"></i> 25 Sep 2025</span>
+          <button class="like-btn" data-article-id="4">
+            <i class="far fa-heart"></i>
+            <span class="like-count"></span>
+          </button>
         </div>
-      </article>
+        <a class="read-more" href="/articles/article4.html">Lire l'article</a>
+      </div>
+    </article>
 
-      <!-- Article 1 -->
-      <article class="card">
-        <img src="/assets/images/fille.jpg" alt="Femme avec smartphone">
-        <div class="card-content">
-          <span class="card-category">Smartphones</span>
-          <h2><a href="/articles/article1.html">Au sommet du monde des smartphones</a></h2>
-          <p>Vous cherchez un smartphone performant ? Ne cherchez plus ! Notre catalogue de smartphones est à couper le souffle. Découvrez en exclusivité le nouveau iPhone 12 Pro Max...</p>
-          <div class="card-meta">
-            <span><i class="far fa-clock"></i> 8 min</span>
-            <span><i class="far fa-calendar"></i> 15 Sep 2025</span>
-          </div>
-          <a class="read-more" href="/articles/article1.html">Lire l'article</a>
+    <!-- Article 2 -->
+    <article class="card">
+      <img src="/assets/images/desktopjeuenligne.jpg" alt="Setup gaming">
+      <div class="card-content">
+        <span class="card-category">Gaming</span>
+        <h2><a href="/articles/article2.html">Le divertissement sans limite</a></h2>
+        <p>Les outils électroniques ne sont pas qu'à but professionnel...</p>
+        <div class="card-meta">
+          <span><i class="far fa-clock"></i> 6 min</span>
+          <span><i class="far fa-calendar"></i> 20 Sep 2025</span>
+          <button class="like-btn" data-article-id="2">
+            <i class="far fa-heart"></i>
+            <span class="like-count"></span>
+          </button>
         </div>
-      </article>
+        <a class="read-more" href="/articles/article2.html">Lire l'article</a>
+      </div>
+    </article>
 
-      <!-- Article 6 -->
-      <article class="card">
-        <img src="/assets/images/casqueetmanette.jpg" alt="Casque et manette de jeu">
-        <div class="card-content">
-          <span class="card-category">Gaming</span>
-          <h2><a href="/articles/article6.html">Immersion totale dans vos jeux</a></h2>
-          <p>Casques VR, manettes et accessoires gaming : découvrez comment transformer vos sessions de jeu en expériences inoubliables...</p>
-          <div class="card-meta">
-            <span><i class="far fa-clock"></i> 5 min</span>
-            <span><i class="far fa-calendar"></i> 10 Sep 2025</span>
-          </div>
-          <a class="read-more" href="/articles/article6.html">Lire l'article</a>
+    <!-- Article 1 -->
+    <article class="card">
+      <img src="/assets/images/fille.jpg" alt="Femme avec smartphone">
+      <div class="card-content">
+        <span class="card-category">Smartphones</span>
+        <h2><a href="/articles/article1.html">Au sommet du monde des smartphones</a></h2>
+        <p>Vous cherchez un smartphone performant ? Ne cherchez plus !...</p>
+        <div class="card-meta">
+          <span><i class="far fa-clock"></i> 8 min</span>
+          <span><i class="far fa-calendar"></i> 15 Sep 2025</span>
+          <button class="like-btn" data-article-id="1">
+            <i class="far fa-heart"></i>
+            <span class="like-count"></span>
+          </button>
         </div>
-      </article>
+        <a class="read-more" href="/articles/article1.html">Lire l'article</a>
+      </div>
+    </article>
+
+    <!-- Article 6 -->
+    <article class="card">
+      <img src="/assets/images/casqueetmanette.jpg" alt="Casque et manette de jeu">
+      <div class="card-content">
+        <span class="card-category">Gaming</span>
+        <h2><a href="/articles/article6.html">Immersion totale dans vos jeux</a></h2>
+        <p>Casques VR, manettes et accessoires gaming...</p>
+        <div class="card-meta">
+          <span><i class="far fa-clock"></i> 5 min</span>
+          <span><i class="far fa-calendar"></i> 10 Sep 2025</span>
+          <button class="like-btn" data-article-id="6">
+            <i class="far fa-heart"></i>
+            <span class="like-count"></span>
+          </button>
+        </div>
+        <a class="read-more" href="/articles/article6.html">Lire l'article</a>
+      </div>
+    </article>
 
     </section>
   </main>
