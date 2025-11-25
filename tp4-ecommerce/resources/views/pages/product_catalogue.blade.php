@@ -126,7 +126,7 @@
          </h2>
          <p class="section-subtitle">Sélection basée sur vos préférences</p>
             <div class="products-grid" id="products-for-you-grid">
-                <a href="product_casqueDetail.html?id=1" class="product-card">
+                <a href="{{ route('casque_details') }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/C1.jpeg" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -144,7 +144,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_disk-detail.html" class="product-card">
+                <a href="{{ route('disk_details') }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/img_disk3.png" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -162,7 +162,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_disk-detail.html" class="product-card">
+                <a href="{{ route('disk_details') }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/img_disk5.png" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -180,7 +180,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_ordi-detail.html" class="product-card">
+                <a href="{{ route('ordi_details') }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/img_Lap1.jpg" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -198,7 +198,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_disk-detail.html" class="product-card">
+                <a href="{{ route('ordi_details') }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/img_disk6.png" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -216,7 +216,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_ordi-detail.html" class="product-card">
+                <a href="{{ route('ordi_details') }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/img_Lap15.jpg" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -234,7 +234,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=1" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 1]) }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/C1.jpeg" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -251,7 +251,7 @@
                             <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
                         </div>
                     </div>
-                </a><a href="product_disk-detail.html" class="product-card">
+                </a><a href="{{ route('disk_details') }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/img_disk2.png" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -269,7 +269,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=1" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 1]) }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/C1.jpeg" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -287,7 +287,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=1" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 1]) }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/C1.jpeg" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -305,7 +305,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=1" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 1]) }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/C1.jpeg" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -323,7 +323,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=1" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 1]) }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/C1.jpeg" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -341,7 +341,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_disk-detail.html" class="product-card">
+                <a href="{{ route('disk_details', ['id' => 1]) }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/img_disk1.png" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>
@@ -359,7 +359,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_disk-detail.html" class="product-card">
+                <a href="{{ route('disk_details') }}" class="product-card">
                  <div class="product-image-wrapper">
                         <img src="/assets/images/img_disk1.png" alt="Momentum Sport Orange" class="product-image">
                         <div class="product-tag tag-premium">PREMIUM</div>

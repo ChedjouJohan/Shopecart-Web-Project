@@ -118,7 +118,7 @@
             <p class="section-subtitle">Most demand</p>
             <div class="products-grid" id="products-for-you-grid">
             
-                <a href="product_manetteDetail.html?id=1" class="product-card" data-id="1" data-brand="sony" data-price-raw="75000" data-rating-raw="4.8">
+                <a href="{{ route('manette_details', ['id' => 1]) }}" class="product-card" data-id="1" data-brand="sony" data-price-raw="75000" data-rating-raw="4.8">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M1.png" alt="DualSense PS5 Blanc" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -136,7 +136,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=2" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
+                <a href="{{ route('manette_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M2.png" alt="Xbox Core Controller Noir" class="product-image">
                         <div class="product-tag tag-promo">-15%</div>
@@ -154,7 +154,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=2" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
+                <a href="{{ route('manette_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M2.png" alt="Xbox Core Controller Noir" class="product-image">
                         <div class="product-tag tag-promo">-15%</div>
@@ -172,26 +172,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=2" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
-                    <div class="product-image-wrapper">
-                        <img src="/assets/images/M2.png" alt="Xbox Core Controller Noir" class="product-image">
-                        <div class="product-tag tag-promo">-15%</div>
-                    </div>
-                    <div class="product-info">
-                        <p class="product-brand">Microsoft</p>
-                        <h3 class="product-title-card">Xbox Core Controller Noir</h3>
-                        <div class="rating-info">
-                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <span class="rating-text">(4.5)</span>
-                        </div>
-                        <div class="product-actions">
-                            <span class="product-price">60 000 FCFA</span>
-                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
-                        </div>
-                    </div>
-                </a>
-                
-                <a href="product_manetteDetail.html?id=2" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
+                <a href="{{ route('manette_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M2.png" alt="Xbox Core Controller Noir" class="product-image">
                         <div class="product-tag tag-promo">-15%</div>
@@ -210,7 +191,26 @@
                     </div>
                 </a>
                 
-                <a href="product_manetteDetail.html?id=4" class="product-card" data-id="4" data-brand="razer" data-price-raw="165000" data-rating-raw="4.7">
+                <a href="{{ route('manette_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
+                    <div class="product-image-wrapper">
+                        <img src="/assets/images/M2.png" alt="Xbox Core Controller Noir" class="product-image">
+                        <div class="product-tag tag-promo">-15%</div>
+                    </div>
+                    <div class="product-info">
+                        <p class="product-brand">Microsoft</p>
+                        <h3 class="product-title-card">Xbox Core Controller Noir</h3>
+                        <div class="rating-info">
+                            <div class="stars-list"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                            <span class="rating-text">(4.5)</span>
+                        </div>
+                        <div class="product-actions">
+                            <span class="product-price">60 000 FCFA</span>
+                            <button class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i></button>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{{ route('manette_details', ['id' => 4]) }}" class="product-card" data-id="4" data-brand="razer" data-price-raw="165000" data-rating-raw="4.7">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M4.jpeg" alt="Razer Wolverine V2 Pro" class="product-image">
                         <div class="product-tag tag-premium">PRO GAMING</div>
@@ -229,7 +229,7 @@
                     </div>
                 </a>
                 
-                <a href="product_manetteDetail.html?id=4" class="product-card" data-id="4" data-brand="razer" data-price-raw="165000" data-rating-raw="4.7">
+                <a href="{{ route('manette_details', ['id' => 4]) }}" class="product-card" data-id="4" data-brand="razer" data-price-raw="165000" data-rating-raw="4.7">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M4.jpeg" alt="Razer Wolverine V2 Pro" class="product-image">
                         <div class="product-tag tag-premium">PRO GAMING</div>
@@ -248,7 +248,7 @@
                     </div>
                 </a>
                 
-                <a href="product_manetteDetail.html?id=6" class="product-card" data-id="6" data-brand="8bitdo" data-price-raw="35000" data-rating-raw="4.6">
+                <a href="{{ route('manette_details', ['id' => 6]) }}"href="product_manetteDetail.html?id=6" class="product-card" data-id="6" data-brand="8bitdo" data-price-raw="35000" data-rating-raw="4.6">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M6.png" alt="8BitDo Ultimate C" class="product-image">
                         <div class="product-tag tag-new tag-right">NOUVEAU</div>
@@ -267,7 +267,7 @@
                     </div>
                 </a>
 
-                <a href="product_manetteDetail.html?id=6" class="product-card" data-id="6" data-brand="8bitdo" data-price-raw="35000" data-rating-raw="4.6">
+                <a href="{{ route('manette_details', ['id' => 6]) }}" class="product-card" data-id="6" data-brand="8bitdo" data-price-raw="35000" data-rating-raw="4.6">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M6.png" alt="8BitDo Ultimate C" class="product-image">
                         <div class="product-tag tag-new tag-right">NOUVEAU</div>
@@ -285,7 +285,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=7" class="product-card" data-id="7" data-brand="logitech" data-price-raw="25000" data-rating-raw="4.0">
+                <a href="{{ route('manette_details', ['id' => 7]) }}" class="product-card" data-id="7" data-brand="logitech" data-price-raw="25000" data-rating-raw="4.0">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M8.png" alt="Logitech F310" class="product-image">
                         <div class="product-tag tag-promo">-20%</div>
@@ -303,7 +303,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=8" class="product-card" data-id="8" data-brand="microsoft" data-price-raw="155000" data-rating-raw="4.9">
+                <a href="{{ route('manette_details', ['id' => 8]) }}" class="product-card" data-id="8" data-brand="microsoft" data-price-raw="155000" data-rating-raw="4.9">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M9.png" alt="Xbox Elite Series 2" class="product-image">
                         <div class="product-tag tag-premium">ELITE</div>
@@ -321,7 +321,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=9" class="product-card" data-id="9" data-brand="sony" data-price-raw="90000" data-rating-raw="4.5">
+                <a href="{{ route('manette_details', ['id' => 8]) }}" class="product-card" data-id="9" data-brand="sony" data-price-raw="90000" data-rating-raw="4.5">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M7.png" alt="DualSense Edge Pro" class="product-image">
                         
@@ -339,7 +339,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=10" class="product-card" data-id="10" data-brand="razer" data-price-raw="99000" data-rating-raw="4.4">
+                <a href="{{ route('manette_details', ['id' => 10]) }}" class="product-card" data-id="10" data-brand="razer" data-price-raw="99000" data-rating-raw="4.4">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M2.png" alt="Razer Kishi V2" class="product-image">
                         
@@ -357,7 +357,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=2" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
+                <a href="{{ route('manette_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M2.png" alt="Xbox Core Controller Noir" class="product-image">
                         <div class="product-tag tag-promo">-15%</div>
@@ -375,7 +375,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=2" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
+                <a href="{{ route('manette_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M2.png" alt="Xbox Core Controller Noir" class="product-image">
                         <div class="product-tag tag-promo">-15%</div>
@@ -393,7 +393,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=2" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
+                <a href="{{ route('manette_details', ['id' => 2]) }}" class="product-card" data-id="2" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M2.png" alt="Xbox Core Controller Noir" class="product-image">
                         <div class="product-tag tag-promo">-15%</div>
@@ -411,7 +411,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=7" class="product-card" data-id="7" data-brand="logitech" data-price-raw="25000" data-rating-raw="4.0">
+                <a href="{{ route('manette_details', ['id' => 7]) }}" class="product-card" data-id="7" data-brand="logitech" data-price-raw="25000" data-rating-raw="4.0">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M8.png" alt="Logitech F310" class="product-image">
                         <div class="product-tag tag-promo">-20%</div>
@@ -431,7 +431,7 @@
                 </a>
 
 
-                <a href="product_manetteDetail.html?id=11" class="product-card" data-id="11" data-brand="sony" data-price-raw="75000" data-rating-raw="4.8">
+                <a href="{{ route('manette_details', ['id' => 11]) }}" class="product-card" data-id="11" data-brand="sony" data-price-raw="75000" data-rating-raw="4.8">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M1.png" alt="DualSense PS5 Blanc (2)" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -449,7 +449,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=12" class="product-card" data-id="12" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
+                <a href="{{ route('manette_details', ['id' => 12]) }}" class="product-card" data-id="12" data-brand="microsoft" data-price-raw="60000" data-rating-raw="4.5">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M2.png" alt="Xbox Core Controller Noir (2)" class="product-image">
                         <div class="product-tag tag-promo">-15%</div>
@@ -467,7 +467,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=13" class="product-card" data-id="13" data-brand="nintendo" data-price-raw="89000" data-rating-raw="4.9">
+                <a href="{{ route('manette_details', ['id' => 13]) }}" class="product-card" data-id="13" data-brand="nintendo" data-price-raw="89000" data-rating-raw="4.9">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M3.png" alt="Switch Pro Controller (2)" class="product-image">
                         <div class="product-tag tag-new tag-right">NOUVEAU</div>
@@ -485,7 +485,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=14" class="product-card" data-id="14" data-brand="razer" data-price-raw="165000" data-rating-raw="4.7">
+                <a href="{{ route('manette_details', ['id' => 14]) }}" class="product-card" data-id="14" data-brand="razer" data-price-raw="165000" data-rating-raw="4.7">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M4.jpeg" alt="Razer Wolverine V2 Pro (2)" class="product-image">
                         <div class="product-tag tag-premium">PRO GAMING</div>
@@ -503,7 +503,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=8" class="product-card" data-id="8" data-brand="microsoft" data-price-raw="155000" data-rating-raw="4.9">
+                <a href="{{ route('manette_details', ['id' => 8]) }}" class="product-card" data-id="8" data-brand="microsoft" data-price-raw="155000" data-rating-raw="4.9">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M9.png" alt="Xbox Elite Series 2" class="product-image">
                         <div class="product-tag tag-premium">ELITE</div>
@@ -521,7 +521,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=9" class="product-card" data-id="9" data-brand="sony" data-price-raw="90000" data-rating-raw="4.5">
+                <a href="{{ route('manette_details', ['id' => 9]) }}" class="product-card" data-id="9" data-brand="sony" data-price-raw="90000" data-rating-raw="4.5">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M7.png" alt="DualSense Edge Pro" class="product-image">
                         
@@ -539,7 +539,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_manetteDetail.html?id=10" class="product-card" data-id="10" data-brand="razer" data-price-raw="99000" data-rating-raw="4.4">
+                <a href="{{ route('manette_details', ['id' => 10]) }}" class="product-card" data-id="10" data-brand="razer" data-price-raw="99000" data-rating-raw="4.4">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M2.png" alt="Razer Kishi V2" class="product-image">
                         

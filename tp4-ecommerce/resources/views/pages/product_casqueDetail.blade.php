@@ -122,7 +122,7 @@
             </h2>
             <p class="section-subtitle">Nos meilleures ventes</p>
             <div class="products-grid" id="best-sellers-grid">
-                <a href="product_casqueDetail.html?id=3" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C2.jpeg" alt="QuietComfort 45" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -140,7 +140,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=4" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 4]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
                         <div class="product-tag tag-new tag-right">NOUVEAU</div>
@@ -158,7 +158,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=9" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="Elite 85h Titanium Black" class="product-image">
                         
@@ -176,7 +176,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=10" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 10]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C3.png" alt="K371 Studio" class="product-image">
                         
@@ -194,7 +194,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=13" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 13]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="WH-1000XM4" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -212,7 +212,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=3" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="QuietComfort 45" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -230,7 +230,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=4" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 4]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
                         <div class="product-tag tag-new tag-right">NOUVEAU</div>
@@ -248,7 +248,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=9" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="Elite 85h Titanium Black" class="product-image">
                         
@@ -266,7 +266,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=10" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 10]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C3.png" alt="K371 Studio" class="product-image">
                         
@@ -284,7 +284,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=13" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 13]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="WH-1000XM4" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -302,7 +302,7 @@
                         </div>
                     </div>
                 </a>
-               <a href="product_casqueDetail.html?id=3" class="product-card">
+               <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="QuietComfort 45" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -320,7 +320,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=4" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 4]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
                         <div class="product-tag tag-new tag-right">NOUVEAU</div>
@@ -338,7 +338,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=9" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="Elite 85h Titanium Black" class="product-image">
                         
@@ -356,7 +356,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=10" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 9]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C3.png" alt="K371 Studio" class="product-image">
                         
@@ -374,7 +374,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=13" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 13]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="WH-1000XM4" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -392,7 +392,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=14" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 14]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/M3.png" alt="WH-1000XM4" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -410,7 +410,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=15" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 15]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C7.jpeg" alt="ATH-M50x Studio" class="product-image">
                         <div class="product-tag tag-new tag-right">NOUVEAU</div>
@@ -428,7 +428,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=16" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 16]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="ATH-M50x Studio" class="product-image">
                         <div class="product-tag tag-new tag-right">NOUVEAU</div>
@@ -446,7 +446,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=3" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="QuietComfort 45" class="product-image">
                         <div class="product-tag tag-best-seller">TOP VENTE</div>
@@ -464,7 +464,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="product_casqueDetail.html?id=4" class="product-card">
+                <a href="{{ route('casque_details', ['id' => 3]) }}" class="product-card">
                     <div class="product-image-wrapper">
                         <img src="/assets/images/C4.jpeg" alt="WH-1000XM5" class="product-image">
                         <div class="product-tag tag-new tag-right">NOUVEAU</div>

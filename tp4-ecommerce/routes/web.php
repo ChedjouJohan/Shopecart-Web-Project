@@ -48,4 +48,10 @@ Route::view('/security','security')->name('security');
 Route::view('/conditions','conditions')->name('conditions');
 Route::view('/cookies','cookies')->name('cookies');
 Route::view('/panier','panier')->name('panier');
+Route::view('/product_casqueDetail', 'pages.product_casqueDetail')->name('casque_details');
+Route::view('/product_manetteDetail', 'pages.product_manetteDetail')->name('manette_details');
+Route::view('/product_ordi-detail', 'pages.product_ordi-detail')->name('ordi_details');
+Route::view('/product_disk-detail', 'pages.product_disk-detail')->name('disk_details');
+Route::view('/product_cam_details', 'pages.product_cam_details')->name('cam_details');
+Route::view('/product_tel_details', 'pages.product_tel_details')->name('tel_details');
 

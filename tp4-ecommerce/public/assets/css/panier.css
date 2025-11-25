@@ -1,358 +1,638 @@
-/* Charte graphique:
-Couleurs Principales :
+/* ========================================
+   CHARTE GRAPHIQUE
+   ======================================== */
+/*
+Couleurs Principales:
+- Bleu Principal: #1e3a8a
+- Bleu Secondaire: #1e40af  
+- Bleu Clair: #3b82f6
+- Rouge (Danger/Suppression): #dc2626
+- Rouge Foncé (Hover): #b91c1c
+Police: "Segoe UI", Roboto, Arial, sans-serif
+*/
 
-Bleu Principal : #1e3a8a (Bleu profond professionnel)
-Bleu Secondaire : #1e40af (Bleu moyen)
-Bleu Clair : #3b82f6 (Pour les accents)
-
-Police: "Segoe UI", Roboto, Arial, sans-serif */
-
+/* ========================================
+   STYLES GÉNÉRAUX
+   ======================================== */
 
 body {
     margin: 0;
     padding: 0;
-    font-family: "Segoe UI", Roboto, Arial, sans serif;
-    padding-top: 7rem;
-    /* background-color: #f5f5f5; */
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background-color: #f5f5f5; /* Fond gris léger */
+    display: flex; /* Active flexbox pour le layout */
+    flex-direction: column; /* Empile header, main, footer verticalement */
+    min-height: 100vh; /* Hauteur minimale de la fenêtre */
 }
 
-/*
-    Main cart container
-*/
+/* Forcer le main à prendre l'espace restant et ajouter padding pour le header fixe */
+main {
+    flex: 1; /* Prend tout l'espace disponible entre header et footer */
+    margin-top: 120px; /* Espace pour le header fixe (ajusté pour couvrir la hauteur du header + bordure) */
+    position: relative; /* Assure que le main reste sous le header */
+    z-index: 1; /* S'assure que le main est sous le header (z-index: 1000) */
+}
 
-/* Main container that wraps all cart content */
+/* ========================================
+   CONTENEUR PRINCIPAL DU PANIER
+   ======================================== */
+
 .cart-container {
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 0 20px;
-    background-color: #ffffff;
+    max-width: 1200px; /* Largeur maximale du contenu */
+    margin:100px auto 40px; /* Centrage horizontal avec marges */
+    padding: 0 20px 40px 20px; /* Padding latéral + padding bottom pour espace avant footer */
+    min-height: auto; /* Enlever la hauteur minimale qui cause le problème */
+}
+
+/* ========================================
+   EN-TÊTE DU PANIER
+   ======================================== */
+
+.cart-header {
+    margin-bottom: 30px; /* Espace sous l'en-tête */
 }
 
 .cart-title {
-    font-size: 28px;
+    font-size: 32px; /* Taille du titre */
     font-weight: bold;
-    color: #1e3a8a;
-    margin-bottom: 30px;
-    text-align: left;
+    color: #1e3a8a; /* Bleu principal */
+    margin-bottom: 10px;
+    display: flex; /* Flexbox pour aligner icône et texte */
+    align-items: center;
+    gap: 15px; /* Espace entre icône et texte */
 }
 
-/* Cart content layout (two column gird)*/
+.cart-title i {
+    font-size: 28px; /* Taille de l'icône */
+}
+
+.cart-item-count {
+    font-size: 16px;
+    color: #666; /* Gris moyen */
+    font-weight: 500;
+}
+
+.cart-item-count span {
+    color: #1e40af; /* Bleu secondaire pour le nombre */
+    font-weight: bold;
+}
+
+/* ========================================
+   INDICATEUR DE CHARGEMENT
+   ======================================== */
+
+.loading-indicator {
+    text-align: center; /* Centrage du contenu */
+    padding: 60px 20px;
+    color: #1e40af; /* Bleu secondaire */
+}
+
+.loading-indicator i {
+    font-size: 48px; /* Grande icône de chargement */
+    margin-bottom: 20px;
+}
+
+.loading-indicator p {
+    font-size: 18px;
+    color: #666;
+}
+
+/* ========================================
+   MESSAGE PANIER VIDE
+   ======================================== */
+
+.empty-cart-message {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 12px; /* Coins arrondis */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Ombre légère */
+}
+
+.empty-cart-message i {
+    font-size: 80px; /* Très grande icône */
+    color: #e0e0e0; /* Gris clair */
+    margin-bottom: 20px;
+}
+
+.empty-cart-message h2 {
+    font-size: 24px;
+    color: #1e3a8a; /* Bleu principal */
+    margin-bottom: 10px;
+}
+
+.empty-cart-message p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.btn-continue-shopping {
+    display: inline-flex; /* Flexbox inline pour l'icône et le texte */
+    align-items: center;
+    gap: 10px;
+    padding: 12px 30px;
+    background-color: #1e3a8a; /* Bleu principal */
+    color: white;
+    text-decoration: none;
+    border-radius: 25px; /* Bouton arrondi */
+    font-weight: bold;
+    transition: all 0.3s ease; /* Animation fluide */
+}
+
+.btn-continue-shopping:hover {
+    background-color: #3b82f6; /* Bleu clair au survol */
+    transform: translateY(-2px); /* Légère élévation */
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); /* Ombre bleue */
+}
+
+/* ========================================
+   LAYOUT DU CONTENU (DEUX COLONNES)
+   ======================================== */
 
 .cart-content {
     display: flex;
-    gap: 30px;
-    align-items: flex-start;
+    gap: 30px; /* Espace entre les colonnes */
+    align-items: flex-start; /* Alignement en haut */
 }
 
-/* LEFT COLUMN */
+/* ========================================
+   BOUTON VIDER LE PANIER (Nouveau Style)
+   ======================================== */
 
-/* Container for all cart item cards */
+.cart-actions-top {
+    display: flex;
+    justify-content: flex-end; /* Aligner le bouton à droite */
+    margin-bottom: 20px;
+}
+
+.btn-clear-cart {
+    background-color: #dc2626; /* Rouge */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-clear-cart:hover {
+    background-color: #b91c1c; /* Rouge plus foncé au survol */
+    transform: translateY(-2px);
+}
+
+.btn-clear-cart:active {
+    transform: translateY(0);
+}
+
+/* ========================================
+   COLONNE GAUCHE: ARTICLES DU PANIER
+   ======================================== */
 
 .cart-items {
-    flex: 2;
+    flex: 2; /* Prend 2/3 de l'espace */
     display: flex;
-    flex-direction: column;
-    gap: 20px;
+    flex-direction: column; /* Empile les articles verticalement */
+    gap: 20px; /* Espace entre les cartes */
 }
 
-/* Individual cart item */
+/* ========================================
+   CARTE D'ARTICLE INDIVIDUELLE
+   ======================================== */
 
 .cart-item {
     display: flex;
     align-items: center;
     padding: 20px;
+    background-color: white;
     border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba (0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    border-radius: 12px; /* Coins arrondis */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Ombre subtile */
+    transition: all 0.3s ease; /* Animation au survol */
+    position: relative; /* Pour positionner le badge de quantité */
 }
 
 .cart-item:hover {
-    box-shadow: o 4px 8px rgba(0, 0, 0, 0.1);
-    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); /* Ombre bleue au survol */
+    border-color: #3b82f6; /* Bordure bleue */
+    transform: translateY(-2px); /* Légère élévation */
 }
-/* Product image */
+
+/* Animation de suppression (glissement vers la droite et disparition) */
+.cart-item.removing {
+    animation: slideOutRight 0.5s ease forwards; /* Animation de sortie */
+}
+
+@keyframes slideOutRight {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(100%); /* Glisse vers la droite */
+    }
+}
+
+/* ========================================
+   IMAGE DU PRODUIT
+   ======================================== */
 
 .item-image {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
+    width: 120px; /* Largeur fixe */
+    height: 120px; /* Hauteur fixe */
+    object-fit: cover; /* Ajuste l'image sans déformation */
     border-radius: 8px;
     margin-right: 20px;
+    border: 1px solid #f0f0f0; /* Bordure légère */
 }
 
-/* PRODUCT DETAILS SECTION */
+/* ========================================
+   DÉTAILS DU PRODUIT
+   ======================================== */
 
-/* Container for product name and color */
 .item-details {
-    flex: 1; 
+    flex: 1; /* Prend l'espace restant */
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-/* Product name */
 .item-name {
     font-size: 18px;
     font-weight: bold;
-    color: #333;
+    color: #1e3a8a; /* Bleu principal */
     margin: 0;
 }
 
-/* Product color description */
+.item-brand {
+    font-size: 14px;
+    color: #888; /* Gris moyen */
+    font-style: italic;
+}
 
 .item-color {
     font-size: 14px;
     color: #666;
-    margin: 0;
+    display: flex; /* Pour aligner l'icône et le texte */
+    align-items: center;
+    gap: 5px;
 }
 
-/* PRODUCT ACTIONS SECTION (Price, Quantity, Remove) */
+.item-color i {
+    color: #1e40af; /* Bleu secondaire pour l'icône */
+}
 
-/* Container for price, quantity and remove button */
+/* Badge de notation (étoiles) */
+.item-rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+}
+
+.stars {
+    color: #fbbf24; /* Couleur dorée pour les étoiles */
+}
+
+.rating-value {
+    color: #666;
+    font-weight: 600;
+}
+
+/* ========================================
+   ACTIONS SUR LE PRODUIT
+   ======================================== */
 
 .item-actions {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
+    align-items: flex-end; /* Alignement à droite */
+    gap: 12px;
 }
 
-/* Product price */
 .item-price {
-    font-size: 18px;
+    font-size: 24px; /* Prix en grand */
     font-weight: bold;
-    color: #1e40af; /* Dark gray color */
+    color: #1e40af; /* Bleu secondaire */
     margin: 0;
 }
 
-/*Quantity text */
+/* ========================================
+   CONTRÔLES DE QUANTITÉ
+   ======================================== */
 
-.item-quantity {
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #f8f9fa; /* Fond gris très clair */
+    padding: 8px 12px;
+    border-radius: 20px; /* Coins arrondis */
+    border: 1px solid #e0e0e0;
+}
+
+.quantity-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background-color: #1e3a8a; /* Bleu principal */
+    color: white;
+    border-radius: 50%; /* Bouton circulaire */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 14px;
-    color: #666;
-    margin: 0;
+    transition: all 0.2s ease;
 }
 
-/* Remove button */
+.quantity-btn:hover {
+    background-color: #3b82f6; /* Bleu clair au survol */
+    transform: scale(1.1); /* Légère augmentation de taille */
+}
+
+.quantity-btn:active {
+    transform: scale(0.95); /* Effet de clic */
+}
+
+.quantity-display {
+    min-width: 30px;
+    text-align: center;
+    font-weight: bold;
+    color: #1e3a8a; /* Bleu principal */
+    font-size: 16px;
+}
+
+/* ========================================
+   BOUTON SUPPRIMER (Article individuel)
+   ======================================== */
+
 .remove-btn {
-    padding: 8px 20px;
-    background-color: #1e3a8a;
-    color: #ffffff;
+    padding: 10px 20px;
+    background-color: #dc2626; /* Rouge pour la suppression */
+    color: white;
     border: none;
     border-radius: 20px;
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
 }
 
-/* Remove button hover effect */
 .remove-btn:hover {
-    background-color: #1e40af;
-    transform: translateY(-2px); /*Légère élévation au survol*/
+    background-color: #b91c1c; /* Rouge plus foncé au survol */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3); /* Ombre rouge */
 }
 
 .remove-btn:active {
     transform: translateY(0);
 }
 
-/* =======================================
-    RIGHT COLUMN: ORDER SUMMARY SECTION 
-    ====================================== */
+/* ========================================
+   COLONNE DROITE: RÉSUMÉ DE COMMANDE
+   ======================================== */
 
-/* Container for the entier order summary*/
 .order-summary {
-    flex: 1;
-    background-color: #ffffff;
+    flex: 1; /* Prend 1/3 de l'espace */
+    background-color: white;
     border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 25px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: sticky; /* Makes the summary to stick to viewport when scrolling*/
-    top: 20px; /* Stays 20px from the top when scrolling (sticky postioning)*/
-    height: fit-content; /*Height adjusts to content inside */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: sticky; /* Reste visible en scrollant */
+    top: 120px; /* Position par rapport au haut de la fenêtre */
+    height: fit-content; /* S'adapte au contenu */
 }
 
-/* Order Summary title */
 .summary-title {
     font-size: 22px;
     font-weight: bold;
-    color: #1e3a8a;
+    color: #1e3a8a; /* Bleu principal */
     margin-bottom: 20px;
     margin-top: 0;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* SUMMARY BOX (Price Breakdown)*/
+/* ========================================
+   BOX DE RÉSUMÉ
+   ======================================== */
+
 .summary-box {
-    border: 2px solid #333;
+    border: 2px solid #1e3a8a; /* Bordure bleue */
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 25px;
-    box-shadow: 0 2px 4px rgba(30, 58, 138, 0.1)
+    background-color: #f8f9fa; /* Fond gris très clair */
 }
 
-/* Each row in the summary */
 .summary-row {
     display: flex;
-    justify-content: space-between; /* Pushes label to left and value to right */
+    justify-content: space-between; /* Espacement entre label et valeur */
     align-items: center;
     margin-bottom: 15px;
 }
 
-/* Remove bottom margin from the last row */
 .summary-row:last-child {
-    margin-bottom: 0; /*No margin after last row (Total)*/
+    margin-bottom: 0;
 }
 
-/* Label text */
 .summary-label {
     font-size: 16px;
-    color: #333;
-    font-weight: normal;
+    color: #1e3a8a; /* Bleu principal */
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.summary-label i {
+    color: #1e40af; /* Bleu secondaire pour les icônes */
 }
 
 .summary-value {
-    font-size: 16px; 
-    color: #333;
+    font-size: 16px;
+    color: #1e40af; /* Bleu secondaire */
     font-weight: bold;
 }
 
-/* TOTAL ROW */
-
-/* Special styling for the Total row */
-.summary-total {
-    border-top: 1px solid #e0e0e0;
-    padding-top: 15px;
-    margin-top: 5px;
+.discount-value {
+    color: #10b981; /* Vert pour la réduction */
 }
 
-/* Total label */
+/* ========================================
+   LIGNE DU TOTAL
+   ======================================== */
+
+.summary-total {
+    border-top: 2px solid #3b82f6; /* Bordure supérieure bleue */
+    padding-top: 15px;
+    margin-top: 10px;
+    background-color: #eff6ff; /* Fond bleu très pâle */
+    padding: 15px;
+    border-radius: 6px;
+    margin: 10px -5px 0 -5px; /* Déborde légèrement pour l'effet visuel */
+}
+
 .summary-total .summary-label {
     font-weight: bold;
     font-size: 18px;
-    color: #1e3a8a;
+    color: #1e3a8a; /* Bleu principal */
 }
 
-/* Total value */
 .summary-total .summary-value {
     font-weight: bold;
-    font-size: 18px;
-    color: #1e40af;
+    font-size: 20px; /* Plus grand pour le total */
+    color: #1e40af; /* Bleu secondaire */
 }
 
-/* CHECKOUT BUTTON */
+/* ========================================
+   BOUTON DE PAIEMENT
+   ======================================== */
 
 .checkout-btn {
     width: 100%;
-    padding: 15px;
-    background-color: #ffffff;
-    color: #1e3a8a;
-    border: 2px solid #333;
+    padding: 16px;
+    background-color: #1e3a8a; /* Bleu principal */
+    color: white;
+    border: none;
     border-radius: 25px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
     transition: all 0.3s ease;
+    margin-bottom: 15px;
 }
 
 .checkout-btn:hover {
-    background-color: #1e3a8a;
-    color: #ffffff;
-    border-color: #1e40af;
+    background-color: #3b82f6; /* Bleu clair au survol */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4); /* Ombre bleue */
 }
 
-/* Ajouter ces media queries à la fin du fichier */
-
-@media (max-width: 1024px) {
-    .cart-container {
-        max-width: 95%;
-        margin: 30px auto;
-    }
-    
-    .cart-content {
-        gap: 20px;
-    }
+.checkout-btn:active {
+    transform: translateY(0);
 }
+
+/* ========================================
+   LIEN CONTINUER LES ACHATS
+   ======================================== */
+
+.continue-shopping-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    color: #1e40af; /* Bleu secondaire */
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.continue-shopping-link:hover {
+    background-color: #f0f7ff; /* Fond bleu très pâle */
+    color: #1e3a8a; /* Bleu principal */
+}
+
+/* ========================================
+   BADGES DE SÉCURITÉ
+   ======================================== */
+
+.security-badges {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+.badge i {
+    color: #10b981; /* Vert pour les icônes de sécurité */
+    font-size: 16px;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN (MOBILE/TABLET)
+   ======================================== */
 
 @media (max-width: 768px) {
+    
+    /* Réduire le margin-top sur mobile car le header est plus compact */
+    main {
+        margin-top: 100px;
+    }
+    
+    /* Empilement vertical sur mobile */
     .cart-content {
         flex-direction: column;
     }
     
-    .cart-items {
-        width: 100%;
-    }
-    
+    /* Le résumé prend toute la largeur */
     .order-summary {
-        position: static;
+        position: static; /* Plus de sticky sur mobile */
         width: 100%;
     }
     
+    /* Articles empilés verticalement sur petit écran */
     .cart-item {
         flex-direction: column;
-        text-align: center;
-        gap: 15px;
+        align-items: flex-start;
     }
     
     .item-image {
         margin-right: 0;
-        width: 120px;
-        height: 120px;
+        margin-bottom: 15px;
+        width: 100%; /* Image pleine largeur */
+        height: auto;
     }
     
     .item-actions {
-        align-items: center;
         width: 100%;
+        align-items: flex-start;
     }
     
     .remove-btn {
         width: 100%;
-        max-width: 200px;
-    }
-}
-
-@media (max-width: 480px) {
-    .cart-container {
-        padding: 0 10px;
-        margin: 20px auto;
+        justify-content: center;
     }
     
+    /* Titre plus petit sur mobile */
     .cart-title {
         font-size: 24px;
-        text-align: center;
     }
-    
-    .item-name {
-        font-size: 16px;
+
+    /* Le bouton Vider le panier s'aligne à gauche ou s'étend sur mobile */
+    .cart-actions-top {
+        justify-content: flex-start;
     }
-    
-    .item-price {
-        font-size: 16px;
-    }
-    
-    .summary-title {
-        font-size: 20px;
-    }
-    
-    .summary-box {
-        padding: 15px;
-    }
-    
-    .summary-label,
-    .summary-value {
-        font-size: 14px;
-    }
-    
-    .summary-total .summary-label,
-    .summary-total .summary-value {
-        font-size: 16px;
-    }
-    
-    .checkout-btn {
-        padding: 12px;
-        font-size: 14px;
+    .btn-clear-cart {
+        width: 100%;
+        justify-content: center;
     }
 }

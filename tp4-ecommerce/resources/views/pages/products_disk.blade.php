@@ -108,7 +108,7 @@
      </div>
  </section>
     
-    <main class="main-content-container">
+ <main class="main-content-container">
        <!--Filters-->
  <div class="product-filters-bar">
      <div class="filter-all-button">
@@ -184,7 +184,6 @@
             <div class="pagination" id="pagin2"></div>
         </section>
     </main>
-
 
 <script src="{{ asset('assets/js/carousel_auto.js') }}"></script>
 <script src="{{ asset('assets/js/carousel_auto.js') }}"></script>
