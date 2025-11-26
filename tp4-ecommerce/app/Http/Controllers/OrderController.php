@@ -48,10 +48,11 @@ class OrderController extends Controller
 
             
             return response()->json([
-                'status' => 'error',
+                'status' => 'succes',
+                'data' => [],
                 'message' => 'commande non trouvee',
-                'code' => 404
-            ],404);
+                'code' => 200
+            ],200);
         }
         return new OrderCollection($orders);
 
