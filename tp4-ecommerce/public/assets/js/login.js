@@ -1,3 +1,4 @@
+// login.js - VERSION AVEC API
 document.addEventListener('DOMContentLoaded', () => {
   const passwordInputs = document.querySelectorAll('input[type="password"]');
 
@@ -20,45 +21,139 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- Form Submission and Local Storage ---
+  // --- FORM SUBMISSION WITH API ---
   const form = document.querySelector('.login-form');
 
   if (form) {
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
       const emailInput = form.querySelector('input[name="email"]');
-      const nameInput = form.querySelector('input[name="name"]');
       const passwordInput = form.querySelector('input[name="password"]');
-      const confirmPasswordInput = form.querySelector('input[name="password_confirm"]');
 
-      // Registration form if name and confirm password fields exist
-      if (nameInput && confirmPasswordInput) {
-        if (passwordInput.value !== confirmPasswordInput.value) {
-          alert('Les mots de passe ne correspondent pas.');
-          return;
-        }
-        const userData = {
-          name: nameInput.value,
+      // Vérifier que le service API est disponible
+      if (typeof apiService === 'undefined') {
+        alert('Erreur: Service API non disponible. Veuillez recharger la page.');
+        return;
+      }
+
+      try {
+        // Afficher un indicateur de chargement
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Connexion...';
+        submitBtn.disabled = true;
+
+        // Appel API pour la connexion
+        const result = await apiService.login({
           email: emailInput.value,
           password: passwordInput.value
-        };
-        localStorage.setItem('user', JSON.stringify(userData));
-        alert('Compte créé avec succès! Vos informations sont enregistrées.');
-        form.reset();
-         window.location.href = 'login.html';
-      } 
-      else if (emailInput && passwordInput) {
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        if (storedUser && storedUser.email === emailInput.value && storedUser.password === passwordInput.value) {
-          localStorage.setItem('lastLogin', JSON.stringify({ email: emailInput.value, loginTime: new Date() }));
-          alert('Connexion réussie!');
+        });
+
+        if (result.token) {
+          // Connexion réussie
+          showNotification('Connexion réussie! Redirection...', 'success');
+          
+          // Sauvegarder aussi dans localStorage pour la compatibilité
+          localStorage.setItem('user', JSON.stringify(result.user));
+          localStorage.setItem('lastLogin', JSON.stringify({ 
+            email: emailInput.value, 
+            loginTime: new Date() 
+          }));
+          
           form.reset();
-           window.location.href = 'about.html';
-        } else {
-          alert('Email ou mot de passe incorrect.');
+          
+          // Redirection après un court délai
+          setTimeout(() => {
+            window.location.href = 'about.html';
+          }, 1500);
         }
+        
+      } catch (error) {
+        console.error('Login error:', error);
+        
+        // Gestion spécifique des erreurs
+        if (error.message.includes('401') || error.message.includes('Invalid credentials')) {
+          showNotification('Email ou mot de passe incorrect.', 'error');
+        } else if (error.message.includes('Network')) {
+          showNotification('Erreur de connexion. Vérifiez votre connexion internet.', 'error');
+        } else {
+          showNotification('Erreur lors de la connexion. Veuillez réessayer.', 'error');
+        }
+        
+        // Réactiver le bouton
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.textContent = 'Se connecter';
+        submitBtn.disabled = false;
       }
     });
+  }
+
+  // Fonction de notification améliorée
+  function showNotification(message, type = 'info') {
+    // Supprimer les notifications existantes
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notif => notif.remove());
+
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+      <i class="fas fa-${getNotificationIcon(type)}"></i>
+      <span>${message}</span>
+    `;
+    
+    notification.style.cssText = `
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      background: ${getNotificationColor(type)};
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 300px;
+      transform: translateX(400px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Animation d'entrée
+    setTimeout(() => {
+      notification.style.transform = 'translateX(0)';
+      notification.style.opacity = '1';
+    }, 10);
+    
+    // Disparaître après 4 secondes
+    setTimeout(() => {
+      notification.style.transform = 'translateX(400px)';
+      notification.style.opacity = '0';
+      setTimeout(() => notification.remove(), 300);
+    }, 4000);
+  }
+
+  function getNotificationIcon(type) {
+    const icons = {
+      success: 'check-circle',
+      error: 'exclamation-circle',
+      warning: 'exclamation-triangle',
+      info: 'info-circle'
+    };
+    return icons[type] || 'info-circle';
+  }
+
+  function getNotificationColor(type) {
+    const colors = {
+      success: '#4CAF50',
+      error: '#f44336',
+      warning: '#ff9800',
+      info: '#2196F3'
+    };
+    return colors[type] || '#2196F3';
   }
 });
