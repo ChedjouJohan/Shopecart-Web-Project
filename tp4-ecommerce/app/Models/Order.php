@@ -53,28 +53,30 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'order_number',
-        'status',
-        'subtotal',
-        'shipping',
-        'tax',
-        'total',
-        'customer_first_name',
-        'customer_last_name',
-        'customer_email',
-        'customer_phone',
-        'shipping_address',
-        'shipping_city',
-        'shipping_zipcode',
-        'shipping_country',
-        'billing_address',
-        'billing_city',
-        'billing_zipcode',
-        'billing_country',
-        'payment_method',
-        'notes',
+        'order_number', 'status', 'subtotal', 'shipping', 'tax', 'discount', 'total',
+        'user_id', 'customer_email', 'customer_name', 'customer_phone',
+        'shipping_address', 'shipping_city', 'shipping_zipcode', 'shipping_country',
+        'billing_address', 'billing_city', 'billing_zipcode', 'billing_country',
+        'payment_method', 'payment_status', 'transaction_id', 'shipping_method', 'notes',
+        'processed_at', 'completed_at', 'cancelled_at'
     ];
+
+    protected $casts = [
+        'subtotal' => 'decimal:2',
+        'shipping' => 'decimal:2',
+        'tax' => 'decimal:2',
+        'discount' => 'decimal:2',
+        'total' => 'decimal:2',
+        'processed_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'cancelled_at' => 'datetime',
+    ];
+
+    // Relations
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function items(): HasMany
     {
