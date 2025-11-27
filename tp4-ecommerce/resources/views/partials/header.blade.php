@@ -3,7 +3,7 @@
     <nav class="navbar">
       <div class="logo">
         <div class="logo-img">
-          <a href="/index.html">
+          <a href="{{ route('home')  }}">
             <img src="/assets/images/shopcart-logo.png" alt="Shopcart Logo" class="logo-img">
           </a>
         </div>
@@ -23,16 +23,16 @@
             Catégories <span class="dropdown-arrow">▼</span>
           </label>
           <div class="dropdown-content" id="dropdownContent">
-            <a href="/pages/products_ordi.html"><i class="fas fa-laptop"></i> Ordinateurs portables</a>
-            <a href="/pages/products_tel.html"><i class="fas fa-mobile-alt"></i> Téléphones</a>
-            <a href="/pages/product_casque.html"><i class="fas fa-headphones"></i> Casques & Écouteurs</a>
+            <a href="{{ route('ordi') }}"><i class="fas fa-laptop"></i> Ordinateurs portables</a>
+            <a href="{{ route('tel') }}"><i class="fas fa-mobile-alt"></i> Téléphones</a>
+            <a href="{{ route('casque') }}"><i class="fas fa-headphones"></i> Casques & Écouteurs</a>
             <a href="#"><i class="fas fa-tablet-alt"></i> Tablettes</a>
-            <a href="/pages/products_ordi.html"><i class="fas fa-desktop"></i> Ordinateurs de bureau</a>
-            <a href="/pages/products_disk.html"><i class="fas fa-keyboard"></i> Périphériques</a>
+            <a href="{{ route('ordi') }}"><i class="fas fa-desktop"></i> Ordinateurs de bureau</a>
+            <a href="{{ route('disk') }}"><i class="fas fa-keyboard"></i> Périphériques</a>
             <a href="#"><i class="fas fa-microchip"></i> Composants PC</a>
             <a href="#"><i class="fas fa-print"></i> Imprimantes</a>
-            <a href="/pages/products_manettes.html"><i class="fas fa-gamepad"></i> Gaming</a>
-            <a href="/pages/products_cam.html"><i class="fas fa-tv"></i> Caméras</a>
+            <a href="{{ route('manettes') }}"><i class="fas fa-gamepad"></i> Gaming</a>
+            <a href="{{ route('cam')  }}"><i class="fas fa-tv"></i> Caméras</a>
           </div>
         </li>
         <li><a href="">Promotions</a></li>
@@ -53,7 +53,7 @@
           <i class="fa-regular fa-user"></i> <span>Se connecter</span>
         </a>
 
-        <a href="{{ route('cart') }}" class="cart-icon">
+        <a href="{{ route('panier') }}" class="cart-icon">
           <i class="fas fa-shopping-cart"></i> <span>Panier</span>
           <span class="cart-count"></span>
         </a>

@@ -28,9 +28,9 @@
       <div class="footer-section">
         <h3>Navigation Rapide</h3>
         <ul>
-          <li><a href=""">Deals</a></li>
-        <li><a href=" /about.html">About Us</a></li>
-          <li><a href="/Blog.html">Blog</a></li>
+          <li><a href="#">Deals</a></li>
+        <li><a href="{{ route('about') }}">About Us</a></li>
+          <li><a href="{{ route('blog') }}">Blog</a></li>
           <li><a href="#">Promotions</a></li>
         </ul>
       </div>
@@ -53,10 +53,10 @@
         <h3>Boutique</h3>
         <div class="shop-categories">
           <ul>
-            <li><a href="/pages/products_tel.html">Smartphones</a></li>
-            <li><a href="/pages/products_ordi.html">Ordinateurs</a></li>
-            <li><a href="/pages/products_casque.html">Casques</a></li>
-            <li><a href="/pages/products_disk.html">Accessoires</a></li>
+            <li><a href="{{route('tel') }}">Smartphones</a></li>
+            <li><a href="{{ route('ordi') }}">Ordinateurs</a></li>
+            <li><a href="{{ route('casque') }}">Casques</a></li>
+            <li><a href="{{ route('manettes') }}">Accessoires</a></li>
           </ul>
         </div>
       </div>
@@ -102,9 +102,9 @@
       <p>© Copyright {{ date('Y') }} Shopcart. Tous droits réservés.</p>
 
       <div class="footer-links">
-        <a href="/security.html">Confidentialité</a>
-        <a href="/conditions.html">Conditions d'utilisation</a>
-        <a href="/cookies.html">Mentions légales</a>
+        <a href="{{ route('security') }}">Confidentialité</a>
+        <a href="{{ route('conditions') }}">Conditions d'utilisation</a>
+        <a href="{{ route('cookies') }}">Mentions légales</a>
       </div>
     </div>
   </footer>
