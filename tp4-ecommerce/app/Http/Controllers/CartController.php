@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
 use App\Models\Cart;
 use App\Models\CartItem;
 use Illuminate\Http\Resources\Json\JsonResource as CartResource;
@@ -33,37 +32,45 @@ class CartController extends Controller
      *     )
      * )
      */
-    public function show(Request $request)
+    public function show()
     {
-        $cart = $this->getOrCreateCart($request);
-        $cart->load('items.product');
+    
+     try{
+            $carts = Cart::where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
-        return new CartResource($cart);
+        if ($carts ->isEmpty()){
+
+            
+            return response()->json([
+                'status' => 'succes',
+                'data' => [],
+                'message' => 'commande non trouvee',
+                'code' => 200
+            ],200);
+        }
+        return new CartResource($carts);
+
+        }
+        catch (\Exception $e){
+
+            return response()->json(['status' => 'error', 'message' => 'Erreur serveur', 'code' => 500], 500);
+
+        }
+
+       
     }
 
     /**
      * @OA\Post(
-     *     path="/api/cart/add/{product}",
-     *     summary="Add item to cart",
+     *     path="/api/cart/add",
+     *     summary="CReate Cart",
      *     tags={"Cart"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="product",
-     *         in="path",
-     *         required=true,
-     *         description="Product ID",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={},
-     *             @OA\Property(property="quantity", type="integer", example=1)
-     *         )
-     *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Item added to cart",
+     *         description="ICReate cart",
      *         @OA\JsonContent(
      *             @OA\Property(property="data", ref="#/components/schemas/Cart")
      *         )
@@ -74,51 +81,12 @@ class CartController extends Controller
      *     )
      * )
      */
-    public function addItem(Request $request, Product $product)
+    public function addItem(Request $request)
     {
-        if ($product->stock < 1) {
-            return response()->json([
-                'message' => 'Product out of stock'
-            ], 422);
-        }
-
+      
         $cart = $this->getOrCreateCart($request);
-        $quantity = $request->input('quantity', 1);
-
-        $existingItem = $cart->items()->where('product_id', $product->id)->first();
-
-        if ($existingItem) {
-            $newQuantity = $existingItem->quantity + $quantity;
-            
-            if ($newQuantity > $product->stock) {
-                return response()->json([
-                    'message' => 'Requested quantity not available in stock'
-                ], 422);
-            }
-            
-            $existingItem->update([
-                'quantity' => $newQuantity,
-                'total' => $existingItem->unit_price * $newQuantity
-            ]);
-        } else {
-            if ($quantity > $product->stock) {
-                return response()->json([
-                    'message' => 'Requested quantity not available in stock'
-                ], 422);
-            }
-            
-            CartItem::create([
-                'cart_id' => $cart->id,
-                'product_id' => $product->id,
-                'quantity' => $quantity,
-                'unit_price' => $product->price,
-                'total' => $product->price * $quantity,
-            ]);
-        }
-
-        $this->updateCartTotals($cart);
         $cart->load('items.product');
-
+      
         return new CartResource($cart);
     }
 

@@ -6,7 +6,6 @@ use App\Models\CartItem;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use App\Exceptions\ProductInsufficientException;
-use App\Models\Cart;
 
 class CartItemController extends Controller
 {
@@ -36,7 +35,7 @@ class CartItemController extends Controller
      * )
      */
     public function getAllCartItems($cartId){
-        return CartItem::where("cartId",$cartId)->get();
+        return CartItem::where("cart_id",$cartId)->get();
     }
 
  /**

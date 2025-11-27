@@ -275,44 +275,16 @@
                 ]
             }
         },
-        "/api/cart/add/{product}": {
+        "/api/cart/add": {
             "post": {
                 "tags": [
                     "Cart"
                 ],
-                "summary": "Add item to cart",
-                "operationId": "510618525eea2bfafef7e7c9f3223cc2",
-                "parameters": [
-                    {
-                        "name": "product",
-                        "in": "path",
-                        "description": "Product ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [],
-                                "properties": {
-                                    "quantity": {
-                                        "type": "integer",
-                                        "example": 1
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
+                "summary": "CReate Cart",
+                "operationId": "c0e8ca78699ccc07858444da702d3ac5",
                 "responses": {
                     "200": {
-                        "description": "Item added to cart",
+                        "description": "ICReate cart",
                         "content": {
                             "application/json": {
                                 "schema": {
