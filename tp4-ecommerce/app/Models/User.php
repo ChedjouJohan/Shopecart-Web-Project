@@ -42,11 +42,12 @@ use Illuminate\Database\Eloquent\Builder; // Import de Builder pour le type hint
  * format="string",
  * description="Adresse"
  * ),
+ * 
  * @OA\Property(
  * property="role",
  * type="string",
  * description="Rôle de l'utilisateur (ex: USER, ADMIN)",
- * enum={"USER", "ADMIN", "VENDOR", "CLIENT", "DELIVERY", "MANAGER", "SUPERVISOR"} // J'ai mis à jour l'enum pour inclure tous les rôles
+ * enum={"USER", "ADMIN", "VENDOR", "CLIENT", "DELIVERY", "MANAGER", "SUPERVISOR"}
  * ),
  * @OA\Property(
  * property="created_at",

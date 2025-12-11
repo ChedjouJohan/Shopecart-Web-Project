@@ -58,7 +58,7 @@ class Order extends Model
         'shipping_address', 'shipping_city', 'shipping_zipcode', 'shipping_country',
         'billing_address', 'billing_city', 'billing_zipcode', 'billing_country',
         'payment_method', 'payment_status', 'transaction_id', 'shipping_method', 'notes',
-        'processed_at', 'completed_at', 'cancelled_at'
+        'processed_at', 'completed_at', 'cancelled_at','delivery_user_id'
     ];
 
     protected $casts = [

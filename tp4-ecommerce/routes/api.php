@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Api\DeliveryController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -31,6 +33,7 @@ Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 
+
 // Auth routes 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -38,6 +41,8 @@ Route::post('/login', [AuthController::class, 'login']);
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
+
+        
     });
 
 
@@ -58,6 +63,9 @@ Route::prefix("cartItems")->group(function(){
      Route::delete("/{cartItemId}",[CartItemController::class,"deleteCartItem"]);
 
 });
+
+// --- NOUVELLES API LOGISTIQUE ---
+
 Route::prefix("payment")->group(
     function(){
         Route::post("/create-payment-intent/order/{orderId}",[PaymentController::class,"createPaymentIntentWithCardd"]);
@@ -94,6 +102,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/categories', [CategoryController::class, 'store']);
         Route::put('/categories/{category}', [CategoryController::class, 'update']);
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+    });
+    Route::prefix('deliveries')->controller(DeliveryController::class)->group(function () {
+        // Routes Administration (Angular)
+        Route::get('pending', 'getPendingDeliveries');
+        Route::post('{order}/assign', 'assignDelivery');
+
+        // Routes Livreur (React Native)
+        Route::get('my', 'getMyDeliveries');
+        Route::put('{order}/status', 'updateStatus');
+        
+        // Les routes pour le GPS et la preuve de livraison seront ajoutées plus tard
     });
 
     // === ROUTES ADMIN OU VENDEUR ===
