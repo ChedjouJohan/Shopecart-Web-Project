@@ -7,15 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+
 /**
  * @OA\Schema(
  * schema="Order",
- * title="Order",
- * description="Modèle de données pour une commande client.",
+ * title="Order Model",
+ * description="Modèle de données complet pour une commande client.",
  * @OA\Property(property="id", type="integer", format="int64", description="ID unique de la commande."),
  * @OA\Property(property="user_id", type="integer", format="int64", description="ID de l'utilisateur qui a passé la commande."),
  * @OA\Property(property="order_number", type="string", description="Numéro unique de la commande (ex: ORD-20251114-abcxyz)."),
- * @OA\Property(property="status", type="string", description="Statut de la commande (ex: pending, processing, shipped, completed).", enum={"pending", "processing", "shipped", "completed", "cancelled"}),
+ * @OA\Property(
+ * property="status",
+ * type="string",
+ * description="Statut de la commande.",
+ * enum={"PENDING", "PROCESSING", "PAID", "SHIPPED", "DELIVERED", "CANCELED", "FAILED", "IN_DELIVERY"}
+ * ),
  * @OA\Property(property="subtotal", type="number", format="float", description="Sous-total des articles."),
  * @OA\Property(property="shipping", type="number", format="float", description="Frais de livraison."),
  * @OA\Property(property="tax", type="number", format="float", description="Taxes appliquées."),
@@ -37,20 +43,37 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * ),
  * @OA\Property(property="created_at", type="string", format="date-time"),
  * @OA\Property(property="updated_at", type="string", format="date-time"),
- * example={
- * "id": 1,
- * "order_number": "ORD-20251114-ABCDEF",
- * "status": "pending",
- * "total": 125.00,
- * "customer_email": "jane.doe@example.com",
- * "shipping_city": "Paris",
- * "items": {}
- * }
  * )
- */
+ *
+ * /**
+ * * Schéma nécessaire pour les réponses de l'API (ex: OrderController->myOrders)
+ * * @OA\Schema(
+ * * schema="OrderResource",
+ * * title="Order Resource",
+ * * description="Structure de données pour une commande retournée par l'API (inclut les relations items)",
+ * * @OA\Property(property="id", type="integer", example=1),
+ * * @OA\Property(property="order_number", type="string", example="ORD-20251114-ABCDEF"),
+ * * @OA\Property(property="status", type="string", enum={"PENDING", "PROCESSING", "PAID", "SHIPPED", "DELIVERED", "CANCELED", "FAILED", "IN_DELIVERY"}, example="PAID"),
+ * * @OA\Property(property="total", type="number", format="float", example=125.00),
+ * * @OA\Property(property="customer_email", type="string", format="email", example="jane.doe@example.com"),
+ * * @OA\Property(property="shipping_city", type="string", example="Paris"),
+ * * @OA\Property(property="created_at", type="string", format="date-time"),
+ * * @OA\Property(property="items", type="array", @OA\Items(ref="#/components/schemas/OrderItemResource"), description="Articles inclus dans la commande"),
+ * * )
+ * */
 class Order extends Model
 {
     use HasFactory;
+
+    // --- Constantes de Statut corrigées ---
+    public const STATUS_PENDING = 'PENDING';
+    public const STATUS_PROCESSING = "PROCESSING";
+    public const STATUS_PAID = 'PAID';
+    public const STATUS_SHIPPED='SHIPPED';
+    public const STATUS_DELIVERED='DELIVERED'; // Corrigé de 'DELIVERY'
+    public const STATUS_CANCELED='CANCELED';   // Corrigé de 'CABCELED'
+    public const STATUS_FAILED='FAILED';
+    public const STATUS_IN_DELIVERY ='IN_DELIVERY';
 
     protected $fillable = [
         'order_number', 'status', 'subtotal', 'shipping', 'tax', 'discount', 'total',
@@ -73,7 +96,6 @@ class Order extends Model
     ];
 
     // Relations
-
 
     public function items(): HasMany
     {

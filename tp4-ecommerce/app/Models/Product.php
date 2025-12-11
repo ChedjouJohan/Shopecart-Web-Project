@@ -34,6 +34,22 @@ use Illuminate\Support\Str;
  * @OA\Property(property="created_at", type="string", format="date-time"),
  * @OA\Property(property="updated_at", type="string", format="date-time")
  * )
+ * * @OA\Schema(
+ * schema="ProductResource",
+ * title="Product Resource",
+ * description="Structure de données d'un produit dans les réponses API (utilisée par ProductResource).",
+ * @OA\Property(property="id", type="integer", example=101),
+ * @OA\Property(property="category_id", type="integer", example=5),
+ * @OA\Property(property="name", type="string", example="Smartphone X10"),
+ * @OA\Property(property="slug", type="string", example="smartphone-x10"),
+ * @OA\Property(property="price", type="number", format="float", example=799.99),
+ * @OA\Property(property="formatted_price", type="string", example="799,99 €", description="Prix formaté par l'accessoire"),
+ * @OA\Property(property="has_discount", type="boolean", example=true),
+ * @OA\Property(property="discount_percentage", type="integer", example=10, nullable=true),
+ * @OA\Property(property="image", type="string", example="/storage/products/x10.jpg", nullable=true),
+ * @OA\Property(property="is_visible", type="boolean", example=true),
+ * @OA\Property(property="created_at", type="string", format="date-time"),
+ * )
  */
 class Product extends Model
 {
@@ -54,13 +70,23 @@ class Product extends Model
         'gallery' => 'array',
     ];
 
+    protected $appends = [
+        'formatted_price', 
+        'has_discount', 
+        'discount_percentage'
+    ];
 
-    
-
-
-
-    
-
+    /**
+     * Mutator: Assure que le slug est généré automatiquement si non fourni.
+     * @param string $value
+     */
+    public function setNameAttribute(string $value): void
+    {
+        $this->attributes['name'] = $value;
+        if (!isset($this->attributes['slug']) || is_null($this->attributes['slug'])) {
+            $this->attributes['slug'] = Str::slug($value);
+        }
+    }
 
     // Relation avec Category
     public function category(): BelongsTo
@@ -98,16 +124,26 @@ class Product extends Model
     }
 
     // Accessors
+    
+    /**
+     * Accesseur: Retourne le prix formaté en devise.
+     */
     public function getFormattedPriceAttribute(): string
     {
         return number_format($this->price, 2, ',', ' ') . ' €';
     }
 
+    /**
+     * Accesseur: Indique si le produit a un prix de comparaison.
+     */
     public function getHasDiscountAttribute(): bool
     {
         return !is_null($this->compare_price) && $this->compare_price > $this->price;
     }
 
+    /**
+     * Accesseur: Calcule le pourcentage de réduction.
+     */
     public function getDiscountPercentageAttribute(): ?int
     {
         if (!$this->has_discount) return null;

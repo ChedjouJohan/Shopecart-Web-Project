@@ -68,7 +68,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * "total": 50.00
  * }
  * )
- */
+ *
+ * /**
+ * * Schéma de ressource API pour un article de commande (utilisé dans OrderResource).
+ * * @OA\Schema(
+ * * schema="OrderItemResource",
+ * * title="OrderItem Resource",
+ * * description="Représentation d'un article de commande dans les réponses API.",
+ * * @OA\Property(property="id", type="integer", example=1),
+ * * @OA\Property(property="product_id", type="integer", example=5),
+ * * @OA\Property(property="product_name", type="string", example="T-Shirt Bleu"),
+ * * @OA\Property(property="product_sku", type="string", example="TSH-BLU-SM"),
+ * * @OA\Property(property="quantity", type="integer", example=2),
+ * * @OA\Property(property="unit_price", type="number", format="float", example=25.00),
+ * * @OA\Property(property="total", type="number", format="float", example=50.00)
+ * * )
+ * */
 class OrderItem extends Model
 {
     use HasFactory;
