@@ -74,55 +74,57 @@ class OrderController extends Controller
         }
     }
 
-    /**
+   /**
      * @OA\Post(
-     *     path="/api/orders",
-     *     summary="Create a new order",
-     *     tags={"Orders"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"customer_name", "customer_email", "customer_phone", "shipping_address", "shipping_city", "shipping_zipcode", "shipping_country", "payment_method"},
-     *             @OA\Property(property="customer_name", type="string", example="John"),
-     *             @OA\Property(property="customer_email", type="string", format="email", example="john@example.com"),
-     *             @OA\Property(property="customer_phone", type="string", example="+1234567890"),
-     *             @OA\Property(property="shipping_address", type="string", example="123 Main St"),
-     *             @OA\Property(property="shipping_city", type="string", example="New York"),
-     *             @OA\Property(property="shipping_zipcode", type="string", example="10001"),
-     *             @OA\Property(property="shipping_country", type="string", example="USA"),
-     *             @OA\Property(property="billing_address", type="string", example="123 Main St"),
-     *             @OA\Property(property="billing_city", type="string", example="New York"),
-     *             @OA\Property(property="billing_zipcode", type="string", example="10001"),
-     *             @OA\Property(property="billing_country", type="string", example="USA"),
-     *             @OA\Property(property="payment_method", type="string", example="credit_card"),
-     *             @OA\Property(property="notes", type="string", example="Please deliver in the morning")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Order created successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string"),
-     *             @OA\Property(property="order", ref="#/components/schemas/Order")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error"
-     *     )
+     * path="/api/orders",
+     * summary="Create a new order",
+     * tags={"Orders"},
+     * security={{"bearerAuth":{}}},
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"customer_name", "customer_email", "customer_phone", "shipping_address", "shipping_city", "shipping_zipcode", "shipping_country", "payment_method"},
+     * @OA\Property(property="customer_name", type="string", example="John"),
+     * @OA\Property(property="customer_email", type="string", format="email", example="john@example.com"),
+     * @OA\Property(property="customer_phone", type="string", example="+1234567890"),
+     * @OA\Property(property="shipping_address", type="string", example="123 Main St"),
+     * @OA\Property(property="shipping_city", type="string", example="New York"),
+     * @OA\Property(property="shipping_zipcode", type="string", example="10001"),
+     * @OA\Property(property="shipping_country", type="string", example="USA"),
+     * @OA\Property(property="billing_address", type="string", example="123 Main St"),
+     * @OA\Property(property="billing_city", type="string", example="New York"),
+     * @OA\Property(property="billing_zipcode", type="string", example="10001"),
+     * @OA\Property(property="billing_country", type="string", example="USA"),
+     * @OA\Property(property="payment_method", type="string", example="credit_card"),
+     * @OA\Property(property="notes", type="string", example="Please deliver in the morning")
+     * )
+     * ),
+     * @OA\Response(
+     * response=201,
+     * description="Order created successfully",
+     * @OA\JsonContent(
+     * @OA\Property(property="message", type="string"),
+     * @OA\Property(property="order", ref="#/components/schemas/Order")
+     * )
+     * ),
+     * @OA\Response(
+     * response=422,
+     * description="Validation error"
+     * )
      * )
      */
     public function store(Request $request)
     {
        $cart = $this->getCurrentCart($request);
-        $userId = auth()->id();
+       $userId = auth()->id();
 
         if (!$cart || $cart->items_count === 0) {
             return response()->json([
                 'message' => 'Your cart is empty or could not be found.'
             ], 422);
         }
+        
+        // --- 1. Validation de la Requête ---
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email',
@@ -139,11 +141,26 @@ class OrderController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        // --- Pré-chargement des relations pour éviter l'erreur "Attempt to read property 'stock' on null" ---
+        // Si vous utilisez des variantes, utilisez 'productVariant'. Si vous n'utilisez pas de variantes, utilisez 'product'.
+        $cart->load('items.productVariant', 'items.product');
+
         // --- 2. Vérification des stocks ---
         foreach ($cart->items as $item) {
-            if ($item->quantity > $item->product->stock) {
+            // Utilise la variante si elle est présente, sinon le produit principal (fallback)
+            $stockSource = $item->productVariant ?? $item->product; 
+            
+            // Sécurité : Vérifie si le produit/variante a été supprimé
+            if (!$stockSource) {
                 return response()->json([
-                    'message' => "Product {$item->product->name} does not have enough stock. Available: {$item->product->stock}, Requested: {$item->quantity}."
+                    'message' => "An item in your cart is no longer available (ID: {$item->product_id} / Variant ID: {$item->product_variant_id}). Please refresh your cart."
+                ], 422);
+            }
+            
+            // Vérification du stock
+            if ($item->quantity > $stockSource->stock) {
+                return response()->json([
+                    'message' => "Product {$stockSource->name} does not have enough stock. Available: {$stockSource->stock}, Requested: {$item->quantity}."
                 ], 422);
             }
         }
@@ -180,21 +197,28 @@ class OrderController extends Controller
                 'payment_method' => $validated['payment_method'],
                 'notes' => $validated['notes'] ?? null,
             ]);
+           
            // --- 4. Transfert des articles et mise à jour des stocks ---
             foreach ($cart->items as $cartItem) {
+                $stockSource = $cartItem->productVariant ?? $cartItem->product;
+                
                 // Création de l'article de commande
                 $order->items()->create([
-                    'product_id' => $cartItem->product_id,
+                    // Utiliser product_id (du produit parent) et potentiellement product_variant_id
+                    'product_id' => $cartItem->product_id, 
+                    'product_variant_id' => $cartItem->product_variant_id, // Ajouter la variante ID dans l'Order Item
                     'quantity' => $cartItem->quantity,
                     'unit_price' => $cartItem->unit_price,
                     'total' => $cartItem->total,
-                    'product_name' => $cartItem->product->name,
-                    'product_sku' => $cartItem->product->sku,
+                    // Utiliser le nom et le SKU de la source de stock (variante ou produit)
+                    'product_name' => $stockSource->name, 
+                    'product_sku' => $stockSource->sku,
                 ]);
 
-                // Décrémentation du stock
-                $cartItem->product->decrement('stock', $cartItem->quantity);
+                // Décrémentation du stock sur l'objet source (qui est garanti non null)
+                $stockSource->decrement('stock', $cartItem->quantity);
             }
+          
           // --- 5. Nettoyage du panier ---
             $cart->items()->delete();
             $this->updateCartTotals($cart); // Met à jour les totaux du panier à zéro
@@ -202,7 +226,8 @@ class OrderController extends Controller
             DB::commit();
 
             // --- 6. Réponse Client (Minimaliste) ---
-            $order->load(['items.product', 'deliveryUser']); // Chargement des relations pour la ressource
+            // Le chargement doit correspondre à la structure utilisée (items.productVariant/items.product)
+            $order->load(['items.productVariant', 'items.product', 'deliveryUser']); 
 
             return response()->json([
                 'message' => 'Order created successfully. Status: ' . $initialStatus,
@@ -212,6 +237,7 @@ class OrderController extends Controller
      } catch (\Exception $e) {
             DB::rollBack();
             
+            // Vous pouvez renvoyer $e->getMessage() pour le débogage si l'erreur n'est pas critique (comme celle du stock)
             return response()->json([
                 'message' => 'An error occurred during the checkout process.',
                 'error_detail' => $e->getMessage()

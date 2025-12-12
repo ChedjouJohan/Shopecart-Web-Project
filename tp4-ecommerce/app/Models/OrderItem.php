@@ -104,8 +104,21 @@ class OrderItem extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function product(): BelongsTo
+    /**
+     * Get the product variant associated with the order item.
+     */
+    public function productVariant()
     {
-        return $this->belongsTo(Product::class);
+        // Supposons que la clé étrangère est 'product_variant_id'
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+    }
+
+    /**
+     * Get the product associated with the order item.
+     */
+    public function product()
+    {
+        // Supposons que la clé étrangère est 'product_id'
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

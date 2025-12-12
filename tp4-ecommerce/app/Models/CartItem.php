@@ -99,6 +99,14 @@ class CartItem extends Model
     }
 
     /**
+     * Relation vers le produit parent.
+     */
+    public function product()
+    {
+        // Assurez-vous que la colonne 'product_id' existe dans la table 'cart_items'
+        return $this->belongsTo(Product::class, 'product_id'); 
+    }
+    /**
      * Get the product VARIANT (pas le produit).
      * Note: la colonne s'appelle product_variant_id mais devrait référencer product_variants
      */

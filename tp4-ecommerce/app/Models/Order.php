@@ -68,7 +68,10 @@ class Order extends Model
     // --- Constantes de Statut corrigées ---
     public const STATUS_PENDING = 'PENDING';
     public const STATUS_PROCESSING = "PROCESSING";
+    public const STATUS_PENDING_PAYMENT = 'PENDING_PAYMENT';
     public const STATUS_PAID = 'PAID';
+    public const STATUS_ASSIGNED = 'ASSIGNED';
+    public const STATUS_EN_ROUTE = 'EN_ROUTE';
     public const STATUS_SHIPPED='SHIPPED';
     public const STATUS_DELIVERED='DELIVERED'; // Corrigé de 'DELIVERY'
     public const STATUS_CANCELED='CANCELED';   // Corrigé de 'CABCELED'
@@ -96,14 +99,28 @@ class Order extends Model
     ];
 
     // Relations
-
-    public function items(): HasMany
+/**
+     * Get the user who placed the order (customer).
+     */
+    public function user()
     {
-        return $this->hasMany(OrderItem::class);
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    
+    /**
+     * Get the delivery user (e.g., driver, logistic manager) for the order.
+     */
+    public function deliveryUser()
+    {
+        // Supposons que votre table 'orders' possède une colonne 'delivery_user_id'
+        return $this->belongsTo(User::class, 'delivery_user_id'); 
     }
 
-    public function user(): BelongsTo
+    /**
+     * Get the items for the order.
+     */
+    public function items()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(OrderItem::class);
     }
 }

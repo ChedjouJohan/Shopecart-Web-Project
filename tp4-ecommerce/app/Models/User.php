@@ -112,6 +112,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'fcm_token'
     ];
 
     /**
@@ -125,6 +126,21 @@ class User extends Authenticatable
         'role' => 'string',
     ];
 
+    /**
+     * Vérifie si l'utilisateur possède l'un des rôles spécifiés.
+     * @param array|string $roles Les rôles à vérifier (un seul rôle ou un tableau de rôles).
+     * @return bool
+     */
+    public function hasAnyRole(array|string $roles): bool
+    {
+        // Convertit le rôle unique en tableau si nécessaire
+        if (is_string($roles)) {
+            $roles = [$roles];
+        }
+
+        // Vérifie si le rôle de l'utilisateur est inclus dans la liste des rôles requis
+        return in_array($this->role, $roles);
+    }
     // --- RELATIONS ---
 
     public function carts()

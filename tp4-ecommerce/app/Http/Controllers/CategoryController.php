@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Http\Resources\CategoryCollection;
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\ProductResource; // Assurez-vous d'utiliser cette ressource
+use App\Models\User; // Import du modèle User
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage; // NOUVEL IMPORT pour l'image
-use Illuminate\Support\Str; // Déjà présent, mais s'assurer de sa présence
-use Illuminate\Validation\Rule; // NOUVEL IMPORT
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 /**
  * @OA\Tag(
@@ -36,7 +38,7 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $categories = Category::orderBy('position', 'asc') // Tri par position est souvent préféré
+        $categories = Category::orderBy('position', 'asc')
             ->paginate($request->get('per_page', 15));
 
         return response()->json([
@@ -66,8 +68,8 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        // Chargement optionnel des produits pour le détail
-        $category->load('products');
+        // Chargement optionnel des produits (non nécessaire pour une simple vue de catégorie)
+        // $category->load('products'); 
 
         return response()->json([
             'message' => 'Category retrieved successfully',
@@ -100,19 +102,23 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        if (!auth()->check() || !auth()->user()->isAdmin()) {
+        /** @var User|null $user */
+        $user = $request->user();
+
+        // 1. Vérification d'accès (Utilisation de $request->user() ou $user)
+        if (!$user || !$user->isAdmin()) {
             return response()->json(['message' => 'Access denied. Admin role required.'], 403);
         }
 
-        // Utilisation de $request->validate()
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name',
             'description' => 'nullable|string|max:500',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validation pour l'upload de fichier
+            // Image doit être 'nullable' pour la création si vous ne voulez pas la rendre obligatoire
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', 
             'position' => 'nullable|integer|min:0',
         ]);
 
-        // Génération du slug unique
+        // 2. Gestion du slug unique
         $slug = Str::slug($validated['name']);
         $originalSlug = $slug;
         $counter = 1;
@@ -122,9 +128,8 @@ class CategoryController extends Controller
         }
         $validated['slug'] = $slug;
 
-        // Gestion de l'upload de l'image
+        // 3. Gestion de l'upload de l'image
         if ($request->hasFile('image')) {
-            // Stocker dans storage/app/public/categories
             $path = $request->file('image')->store('categories', 'public');
             $validated['image'] = $path;
         }
@@ -164,7 +169,10 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        if (!auth()->check() || !auth()->user()->isAdmin()) {
+        /** @var User|null $user */
+        $user = $request->user();
+
+        if (!$user || !$user->isAdmin()) {
             return response()->json(['message' => 'Access denied. Admin role required.'], 403);
         }
 
@@ -172,20 +180,21 @@ class CategoryController extends Controller
             // Exclure l'ID actuel lors de la vérification d'unicité
             'name' => ['required', 'string', 'max:255', Rule::unique('categories', 'name')->ignore($category->id)],
             'description' => 'nullable|string|max:500',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validation pour la nouvelle image
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'position' => 'nullable|integer|min:0',
-            'remove_image' => 'nullable|boolean',
+            // La validation `boolean` gère 'true', 'false', '1', '0'
+            'remove_image' => 'nullable|boolean', 
         ]);
         
         // 1. Suppression de l'ancienne image si demandée
-        if ($request->boolean('remove_image') && $category->image) {
+        if (isset($validated['remove_image']) && $validated['remove_image'] && $category->image) {
             Storage::disk('public')->delete($category->image);
-            $validated['image'] = null; // S'assurer que le champ est mis à jour dans la DB
+            $validated['image'] = null; // Champ mis à null pour la DB
         }
 
-        // 2. Upload de la nouvelle image
+        // 2. Upload de la nouvelle image (Prioritaire sur la suppression)
         if ($request->hasFile('image')) {
-            // Supprimer l'ancienne image
+            // Supprimer l'ancienne image si elle existe
             if ($category->image) {
                 Storage::disk('public')->delete($category->image);
             }
@@ -195,19 +204,18 @@ class CategoryController extends Controller
         }
 
 
-        // Ne pas régénérer le slug si le nom n'a pas changé
+        // 3. Gestion du slug si le nom a changé
         if ($category->name !== $validated['name']) {
-             // La logique de slug unique peut être encapsulée dans le modèle si vous utilisez un observer ou un mutateur.
              $slug = Str::slug($validated['name']);
              $originalSlug = $slug;
              $counter = 1;
+             // S'assurer que le nouveau slug est unique (excluant la catégorie actuelle)
              while (Category::where('slug', $slug)->where('id', '!=', $category->id)->exists()) {
                  $slug = $originalSlug . '-' . $counter;
                  $counter++;
              }
              $validated['slug'] = $slug;
         }
-
 
         $category->update($validated);
 
@@ -229,9 +237,12 @@ class CategoryController extends Controller
      * @OA\Response(response=422, description="Cannot delete category with associated products.")
      * )
      */
-    public function destroy(Category $category)
+    public function destroy(Category $category, Request $request)
     {
-        if (!auth()->check() || !auth()->user()->isAdmin()) {
+        /** @var User|null $user */
+        $user = $request->user();
+
+        if (!$user || !$user->isAdmin()) {
             return response()->json(['message' => 'Access denied. Admin role required.'], 403);
         }
 
@@ -275,14 +286,14 @@ class CategoryController extends Controller
     {
         // Récupérer uniquement les produits visibles pour le public
         $products = $category->products()
+            // Assurez-vous que la colonne 'is_visible' existe sur votre modèle Product
             ->where('is_visible', true) 
             ->orderBy('created_at', 'desc')
             ->paginate($request->get('per_page', 15));
 
-        // Remplace le format de pagination par la réponse minimaliste
-        return response()->json([
+        // Retourne la collection paginée avec la ProductResource
+        return ProductResource::collection($products)->additional([
             'message' => 'Products retrieved by category successfully',
-            'data' => \App\Http\Resources\ProductResource::collection($products->items()),
             'total' => $products->total(),
             'per_page' => $products->perPage(),
             'current_page' => $products->currentPage(),

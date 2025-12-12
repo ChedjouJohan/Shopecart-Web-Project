@@ -21,93 +21,49 @@ use App\Http\Controllers\Api\DashboardController;
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
+| Ces routes sont chargées par le RouteServiceProvider et sont assignées
+| au groupe de middleware "api".
 |
 */
 
-// ==================== PUBLIC ROUTES ====================
+// =======================================================
+// 1. ROUTES PUBLIQUES & ACCESSIBLES À TOUS
+// =======================================================
 
-// Auth routes
+// --- AUTHENTIFICATION ---
+// Les routes d'enregistrement et de connexion doivent toujours être publiques
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Product & Category routes
+// --- PRODUITS & CATÉGORIES (Lecture publique) ---
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
+Route::get('/categories/{category}/products', [CategoryController::class, 'products']);
 
-// ==================== PROTECTED ROUTES ====================
-
-// Auth routes 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/user', [AuthController::class, 'user']);
-
-        
-    });
-
-
+// --- PANIER NON AUTHENTIFIÉ (Si supporté) ---
+// Note: Ces routes sont souvent obsolètes ou fusionnées avec le panier authentifié.
 Route::prefix("cart")->group(function(){
-    Route::post("/abs",[CartController::class,"store"]);
-    Route::get("/user/{userId}/empty",[CartController::class,"emptyCart"]);
-});
-
-Route::prefix("cartItems")->group(function(){
-    //get cart items
-    //add cart item
-    //remove cart item
-    //update cart item
-    Route::get("/cart/{cartId}",[CartItemController::class,"getAllCartItems"]);
-    Route::get("/{cartItemId}",[CartItemController::class,"getCartItem"]);
-    Route::post("/",[CartItemController::class,"addCartItem"]);
-    Route::put("/{cartItemId}",[CartItemController::class,"updateCartItem"]);
-     Route::delete("/{cartItemId}",[CartItemController::class,"deleteCartItem"]);
-
+    // Exemple d'ajout/création de panier anonyme (abs) ou de vidage par ID utilisateur (userId)
+    Route::post("/abs", [CartController::class, "store"]);
+    Route::get("/user/{userId}/empty", [CartController::class, "emptyCart"]);
 });
 
 
-// ========== PRODUCT VARIANTS ROUTES ==========
-Route::prefix('products/{product}/variants')->group(function () {
-    Route::get('/', [ProductVariantController::class, 'index']); // GET /api/products/{id}/variants
-    Route::post('/', [ProductVariantController::class, 'store'])
-        ->middleware(['auth:sanctum', 'admin_or_vendor']); // POST /api/products/{id}/variants
-});
+// =======================================================
+// 2. ROUTES PROTÉGÉES (Requiert le middleware 'auth:sanctum')
+// =======================================================
 
-Route::prefix('variants')->group(function () {
-    Route::get('/{variant}', [ProductVariantController::class, 'show']); // GET /api/variants/{id}
-    Route::put('/{variant}', [ProductVariantController::class, 'update'])
-        ->middleware(['auth:sanctum', 'admin_or_vendor']); // PUT /api/variants/{id}
-    Route::delete('/{variant}', [ProductVariantController::class, 'destroy'])
-        ->middleware(['auth:sanctum', 'admin_or_vendor']); // DELETE /api/variants/{id}
-    Route::get('/search/by-sku/{sku}', [ProductVariantController::class, 'searchBySku']); // GET /api/variants/search/by-sku/{sku}
-});
-
-
-// --- NOUVELLES API LOGISTIQUE ---
-
-Route::prefix("payment")->group(
-    function(){
-        Route::post("/create-payment-intent/order/{orderId}",[PaymentController::class,"createPaymentIntentWithCardd"]);
-        Route::post("/registerPayment",[PaymentController::class,"storePayment"]);
-
-    }
-);
-
-// Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     
-    // ========== AUTH & USER ==========
-    Route::get('/user', [AuthController::class, 'user']);
+    // --- A. AUTHENTIFICATION & UTILISATEUR ---
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
+    Route::post('user/fcm-token', [UserController::class, 'updateFcmToken']); // Notifications Push
     
-    // ========== CART ROUTES ==========
+    // --- B. PANIER & ARTICLES DE PANIER ---
     Route::prefix('cart')->group(function () {
         Route::get('/', [CartController::class, 'show']);                    // GET /api/cart
         Route::post('/', [CartController::class, 'store']);                  // POST /api/cart (créer/récupérer)
@@ -116,102 +72,94 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/items/{cartItem}', [CartController::class, 'removeItem']); // DELETE /api/cart/items/{id}
         Route::delete('/clear', [CartController::class, 'clear']);           // DELETE /api/cart/clear
     });
-    
-    // ========== CART ITEMS (Legacy routes) ==========
-    Route::prefix('cartItems')->group(function () {
-        Route::get('/cart/{cartId}', [CartItemController::class, 'getAllCartItems']);
-        Route::get('/{cartItemId}', [CartItemController::class, 'getCartItem']);
-        Route::post('/', [CartItemController::class, 'addCartItem']);
-        Route::put('/{cartItemId}', [CartItemController::class, 'updateCartItem']);
-        Route::delete('/{cartItemId}', [CartItemController::class, 'deleteCartItem']);
-    });
-    
-    // ========== ORDER ROUTES ==========
+
+    // --- C. COMMANDES & PAIEMENTS ---
     Route::get('/orders', [OrderController::class, 'index']);
-    Route::post('/orders', [OrderController::class, 'store']);
+    Route::post('/orders', [OrderController::class, 'store']); // Création de commande
     Route::get('orders/my', [OrderController::class, 'myOrders']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
-    
-    // ========== PAYMENT ROUTES ==========
+
     Route::prefix('payment')->group(function () {
         Route::post('/create-payment-intent/order/{orderId}', [PaymentController::class, 'createPaymentIntentWithCardd']);
         Route::post('/registerPayment', [PaymentController::class, 'storePayment']);
     });
     
-    // ========== PRODUCT ROUTES (Authenticated Users) ==========
-    Route::get('/products/vendor/my-products', [ProductController::class, 'myProducts']);
-    
-    // ========== ADMIN ONLY ROUTES ==========
-    Route::put('orders/{order}/status', [OrderController::class, 'updateStatus'])
-    ->middleware(['auth:sanctum', 'role:ADMIN,MANAGER,SUPERVISOR']);
-
-     // === ROUTES ADMIN SEULEMENT ===
-    Route::middleware('admin')->group(function () {
-        // User Management
-        Route::apiResource('users', UserController::class);
-        Route::get('/users/roles/stats', [UserController::class, 'roleStats']);
+    // --- D. LOGISTIQUE & LIVRAISON (CORRIGÉ : Toutes ces routes sont maintenant protégées) ---
+    Route::prefix('deliveries')->controller(DeliveryController::class)->group(function () {
         
-        // Category Management
-        Route::post('/categories', [CategoryController::class, 'store']);
-        Route::put('/categories/{category}', [CategoryController::class, 'update']);
-        Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+        // Routes Livreur (React Native)
+        Route::get('my', 'getMyDeliveries');
+        Route::get('history', 'getDeliveryHistory');
+        Route::put('{order}/status', 'updateStatus');
+        Route::post('location', 'updateLocation'); 
+        Route::post('{order}/proof', 'uploadProof');
+        Route::get('{order}/proof', 'getProof');
     });
-    
-    // ========== ADMIN OR VENDOR ROUTES ==========
 
-    // --- API DASHBOARD ET RAPPORTS (Réservé aux Rôles de Gestion) ---
-    // Vous pouvez ajouter un middleware 'role:admin,manager,supervisor' ici si vous l'avez
+    // --- E. TEST (Temporaire) ---
+    Route::get('/test-auth', function (Request $request) {
+        return response()->json([
+            'message' => 'Auth Success',
+            'user_id' => $request->user()->id,
+            'user_role' => $request->user()->role,
+        ]);
+    });
+});
+
+
+// =======================================================
+// 3. ROUTES À ACCÈS RESTREINT PAR RÔLE
+// (Nécessite 'auth:sanctum' + middleware de rôle)
+// =======================================================
+
+// --- A. ADMIN / MANAGER / SUPERVISOR (Rôles de Gestion) ---
+Route::middleware(['auth:sanctum', 'role:ADMIN,MANAGER,SUPERVISOR'])->group(function () {
+    
+    // Commandes (Mise à jour du statut par un rôle de gestion)
+    Route::put('orders/{order}/status', [OrderController::class, 'updateStatus']);
+
+    // Tableau de Bord (Dashboard)
     Route::prefix('dashboard')->controller(DashboardController::class)->group(function () {
         Route::get('kpis', 'getKpis');
         Route::get('sales-over-time', 'getSalesOverTime');
         Route::get('top-products', 'getTopProducts');
         Route::get('order-status-distribution', 'getOrderStatusDistribution');
-    });  
-    
-    // Notifications Push - Enregistrement du Token FCM
-    Route::post('user/fcm-token', [UserController::class, 'updateFcmToken']);
-
-    // Historique des Livraisons
-    Route::get('deliveries/history', [DeliveryController::class, 'getDeliveryHistory']);
     });
 
-
-
+    // Logistique (Assignation, suivi carte)
     Route::prefix('deliveries')->controller(DeliveryController::class)->group(function () {
-        // Routes Administration (Angular)
         Route::get('pending', 'getPendingDeliveries');
         Route::post('{order}/assign', 'assignDelivery');
-
-        // Routes Livreur (React Native)
-        Route::get('my', 'getMyDeliveries');
-        Route::put('{order}/status', 'updateStatus');
-        
-        // Géolocalisation (React Native)
-        Route::post('location', 'updateLocation'); 
-
-        // Suivi en temps réel (Angular)
         Route::get('live/map', 'getLiveLocations');
-
-        // Preuve de livraison (React Native)
-        Route::post('{order}/proof', 'uploadProof');
-        Route::get('{order}/proof', 'getProof');
-
-    
-    // === ROUTES ADMIN OU VENDEUR ===
-    Route::middleware('admin_or_vendor')->group(function () {
-        // Product Management
-        Route::post('/products', [ProductController::class, 'store']);
-        Route::put('/products/{product}', [ProductController::class, 'update']);
-        Route::delete('/products/{product}', [ProductController::class, 'destroy']);
-        
-        // Vendor Stats
-        Route::get('/products/vendor/stats', [ProductController::class, 'vendorStats']);
     });
+
+    // Gestion des Utilisateurs (API Resource)
+    Route::apiResource('users', UserController::class); // Index, Store, Show, Update, Destroy
+    Route::get('/users/roles/stats', [UserController::class, 'roleStats']);
 });
 
-// ==================== ROUTES EXTERNES ====================
-// Ces routes étaient en dehors du groupe auth, je les ai réintégrées
-Route::prefix("cart")->group(function(){
-    Route::post("/abs", [CartController::class, "store"]);
-    Route::get("/user/{userId}/empty", [CartController::class, "emptyCart"]);
+
+// --- B. ADMIN / VENDOR (Gestion des Produits/Variantes) ---
+Route::middleware(['auth:sanctum', 'role:ADMIN,VENDOR'])->group(function () {
+    
+    // Gestion des Produits
+    Route::get('/products/vendor/my-products', [ProductController::class, 'myProducts']);
+    Route::post('products', [ProductController::class, 'store']);
+    Route::put('/products/{product}', [ProductController::class, 'update']);
+    Route::delete('/products/{product}', [ProductController::class, 'destroy']);
+    Route::get('/products/vendor/stats', [ProductController::class, 'vendorStats']);
+
+    // Gestion des Catégories (Souvent Admin/Manager seulement, ajusté selon votre logique)
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::put('/categories/{category}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+
+    // Gestion des Variantes
+    Route::prefix('products/{product}/variants')->group(function () {
+        Route::post('/', [ProductVariantController::class, 'store']);
+    });
+    Route::prefix('variants')->group(function () {
+        Route::put('/{variant}', [ProductVariantController::class, 'update']);
+        Route::delete('/{variant}', [ProductVariantController::class, 'destroy']);
+    });
 });

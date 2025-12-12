@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\DeliveryGeolocation; // Assurez-vous d'avoir ce modèle
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\OrderResource;
@@ -19,66 +19,62 @@ use App\Http\Resources\OrderResource;
  */
 class DeliveryController extends Controller
 {
-    // Constantes de statut de livraison
-    private const DELIVERY_STATUSES = ['ASSIGNED', 'EN_ROUTE', 'DELIVERED', 'FAILED', 'PENDING_PAYMENT', 'READY_TO_SHIP'];
+    // Rôles autorisés pour la gestion de la logistique
+    private const MANAGEMENT_ROLES = [User::ROLE_ADMIN, User::ROLE_MANAGER, User::ROLE_SUPERVISOR];
     
+    /**
+     * Vérifie si l'utilisateur est autorisé à gérer les livraisons (Admin, Manager, Supervisor).
+     * @param User|null $user
+     * @return bool
+     */
+    private function checkManagementAccess(?User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+        return in_array($user->role, self::MANAGEMENT_ROLES);
+    }
+
     /**
      * @OA\Get(
      * path="/api/deliveries/pending",
-     * summary="Get orders ready to be assigned to a delivery person",
+     * summary="Get orders ready to be assigned to a delivery person (Management Roles only)",
      * tags={"Deliveries"},
      * security={{"bearerAuth":{}}},
-     * @OA\Response(
-     * response=200,
-     * description="List of pending orders",
-     * @OA\JsonContent(
-     * @OA\Property(property="message", type="string", example="Pending orders retrieved successfully"),
-     * @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Order"))
-     * )
-     * ),
-     * @OA\Response(response=403, description="Forbidden")
+     * @OA\Response(response=200, description="List of pending orders"),
+     * @OA\Response(response=403, description="Forbidden - Management role required")
      * )
      */
-    public function getPendingDeliveries()
+    public function getPendingDeliveries(Request $request)
     {
-        // Restriction : Seuls les rôles gérant la logistique (Admin, Manager, Supervisor)
-        if (!auth()->user()->isAdmin() && !auth()->user()->isManager() && !auth()->user()->isSupervisor()) {
-            return response()->json(['message' => 'Access denied.'], 403);
+        /** @var \App\Models\User $authenticatedUser */
+        $authenticatedUser = $request->user();
+
+        if (!$this->checkManagementAccess($authenticatedUser)) {
+            return response()->json(['message' => 'Access denied. Management role required.'], 403);
         }
 
         // Filtre : Commandes payées et non encore assignées à un livreur
-        // NOTE: Ajustez la logique de 'status' si votre modèle Order utilise des statuts différents.
         $pendingOrders = Order::whereNull('delivery_user_id')
-                              ->whereIn('status', ['PAID', 'READY_TO_SHIP'])
+                              // Assurez-vous que ces constantes de statut existent dans votre modèle Order
+                              ->whereIn('status', [Order::STATUS_PAID, Order::STATUS_READY_TO_SHIP ?? Order::STATUS_PAID])
                               ->orderBy('created_at', 'asc')
                               ->get();
 
         return response()->json([
             'message' => 'Pending orders retrieved successfully',
-            'data' => $pendingOrders
+            'data' => OrderResource::collection($pendingOrders) // Utilisation d'une ressource
         ]);
     }
 
     /**
      * @OA\Post(
      * path="/api/deliveries/{order}/assign",
-     * summary="Assign an order to a delivery person",
+     * summary="Assign an order to a delivery person (Management Roles only)",
      * tags={"Deliveries"},
      * security={{"bearerAuth":{}}},
-     * @OA\Parameter(
-     * name="order",
-     * in="path",
-     * required=true,
-     * description="Order ID",
-     * @OA\Schema(type="integer")
-     * ),
-     * @OA\RequestBody(
-     * required=true,
-     * @OA\JsonContent(
-     * required={"delivery_user_id"},
-     * @OA\Property(property="delivery_user_id", type="integer", description="ID of the delivery user")
-     * )
-     * ),
+     * @OA\Parameter(name="order", in="path", required=true, @OA\Schema(type="integer")),
+     * @OA\RequestBody(required=true, @OA\JsonContent(required={"delivery_user_id"}, @OA\Property(property="delivery_user_id", type="integer"))),
      * @OA\Response(response=200, description="Order assigned successfully"),
      * @OA\Response(response=403, description="Forbidden"),
      * @OA\Response(response=404, description="Order or Delivery user not found")
@@ -86,9 +82,12 @@ class DeliveryController extends Controller
      */
     public function assignDelivery(Request $request, Order $order)
     {
-        // Restriction : Seuls les rôles gérant la logistique
-        if (!auth()->user()->isAdmin() && !auth()->user()->isManager() && !auth()->user()->isSupervisor()) {
-            return response()->json(['message' => 'Access denied.'], 403);
+        /** @var \App\Models\User $authenticatedUser */
+        $authenticatedUser = $request->user();
+
+        // 1. Restriction de rôle (Utilisation de la méthode sécurisée)
+        if (!$this->checkManagementAccess($authenticatedUser)) {
+            return response()->json(['message' => 'Access denied. Management role required.'], 403);
         }
 
         $validated = $request->validate([
@@ -111,14 +110,15 @@ class DeliveryController extends Controller
         // Mise à jour de la commande
         $order->update([
             'delivery_user_id' => $deliveryUser->id,
-            'status' => 'ASSIGNED', // Mise à jour du statut pour refléter l'assignation
+            'status' => Order::STATUS_ASSIGNED, // Utilisation de la constante
         ]);
 
-        // TODO: Implémenter la notification push vers l'application React Native ici (voir exigences 104)
+        // Recharge l'ordre pour inclure le livreur dans la réponse (si la ressource l'utilise)
+        $order->load('deliveryUser'); 
 
         return response()->json([
             'message' => "Order {$order->id} assigned to delivery user {$deliveryUser->name} successfully",
-            'data' => $order
+            'data' => new OrderResource($order)
         ]);
     }
 
@@ -129,116 +129,117 @@ class DeliveryController extends Controller
     /**
      * @OA\Get(
      * path="/api/deliveries/my",
-     * summary="Get deliveries assigned to the authenticated user",
+     * summary="Get deliveries assigned to the authenticated user (Delivery Role only)",
      * tags={"Deliveries"},
      * security={{"bearerAuth":{}}},
      * @OA\Response(response=200, description="List of deliveries"),
-     * @OA\Response(response=403, description="Forbidden")
+     * @OA\Response(response=403, description="Forbidden - Delivery role required")
      * )
      */
-    public function getMyDeliveries()
+    public function getMyDeliveries(Request $request)
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = $request->user();
 
-        // Restriction : Seul le rôle DELIVERY
-        if (!$user->isDelivery()) {
+        if (!$user || !$user->isDelivery()) {
             return response()->json(['message' => 'Access denied. Delivery role required.'], 403);
-        }
-
-        if (!$user) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
         }
         
-        // 2. Vérifier si l'utilisateur est le bon rôle
-        if (!$user->isDelivery()) {
-            return response()->json(['message' => 'Access denied. Delivery role required.'], 403);
-        }
         // Récupère les commandes qui sont assignées à ce livreur ET qui ne sont pas encore TERMINÉES
         $myDeliveries = Order::where('delivery_user_id', $user->id)
-                             ->whereNotIn('status', ['DELIVERED', 'FAILED']) // Exclure les commandes terminées
+                             ->whereNotIn('status', [Order::STATUS_DELIVERED, Order::STATUS_FAILED])
                              ->orderBy('created_at', 'asc')
                              ->get();
 
         return response()->json([
             'message' => 'Assigned deliveries retrieved successfully',
-            'data' => $myDeliveries
+            'data' => OrderResource::collection($myDeliveries)
         ]);
     }
 
     /**
-     * @OA\Put(
-     * path="/api/deliveries/{order}/status",
-     * summary="Update the delivery status of an order",
+     * @OA\Get(
+     * path="/api/deliveries/history",
+     * summary="Affiche l'historique des livraisons terminées (Livré, Échec) pour le livreur connecté (Delivery Role only).",
      * tags={"Deliveries"},
      * security={{"bearerAuth":{}}},
-     * @OA\Parameter(
-     * name="order",
-     * in="path",
-     * required=true,
-     * description="Order ID",
-     * @OA\Schema(type="integer")
-     * ),
-     * @OA\RequestBody(
-     * required=true,
-     * @OA\JsonContent(
-     * required={"status"},
-     * @OA\Property(property="status", type="string", enum={"EN_ROUTE", "DELIVERED", "FAILED"}, example="EN_ROUTE")
+     * @OA\Response(response=200, description="Liste des commandes terminées."),
+     * @OA\Response(response=403, description="Accès refusé (non-livreur).")
      * )
-     * ),
+     */
+    public function getDeliveryHistory(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
+        if (!$user || !$user->isDelivery()) {
+            return response()->json(['message' => 'Forbidden. Only delivery personnel can access this resource.'], 403);
+        }
+
+        $finalStatuses = [
+            Order::STATUS_DELIVERED, 
+            Order::STATUS_FAILED,    
+        ];
+
+        $history = Order::where('delivery_user_id', $user->id)
+                        ->whereIn('status', $finalStatuses)
+                        ->orderByDesc('updated_at')
+                        ->paginate(15); 
+
+        return OrderResource::collection($history);
+    }
+    
+    /**
+     * @OA\Put(
+     * path="/api/deliveries/{order}/status",
+     * summary="Update the delivery status of an order (Assigned Delivery Role only)",
+     * tags={"Deliveries"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Parameter(name="order", in="path", required=true, @OA\Schema(type="integer")),
+     * @OA\RequestBody(required=true, @OA\JsonContent(required={"status"}, @OA\Property(property="status", type="string", enum={"EN_ROUTE", "DELIVERED", "FAILED"}, example="EN_ROUTE"))),
      * @OA\Response(response=200, description="Status updated successfully"),
      * @OA\Response(response=403, description="Forbidden"),
-     * @OA\Response(response=404, description="Order not found")
      * )
      */
     public function updateStatus(Request $request, Order $order)
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = $request->user();
 
         // Restriction : Seul le livreur assigné peut changer le statut
-        if (!$user->isDelivery() || $order->delivery_user_id !== $user->id) {
+        if (!$user || !$user->isDelivery() || $order->delivery_user_id !== $user->id) {
             return response()->json(['message' => 'Access denied. Not the assigned delivery person.'], 403);
         }
 
         $validated = $request->validate([
-            'status' => ['required', Rule::in(['EN_ROUTE', 'DELIVERED', 'FAILED'])],
+            'status' => ['required', Rule::in([Order::STATUS_EN_ROUTE, Order::STATUS_DELIVERED, Order::STATUS_FAILED])],
         ]);
 
-        // Mise à jour du statut
         $order->update(['status' => $validated['status']]);
-
-        // TODO: Implémenter WebSockets (pour Angular) ici : Notifier que le statut a changé
 
         return response()->json([
             'message' => "Delivery status updated to {$validated['status']} for order {$order->id}",
-            'data' => $order
+            'data' => new OrderResource($order)
         ]);
     }
-
 
     /**
      * @OA\Post(
      * path="/api/deliveries/location",
-     * summary="Update the authenticated delivery person's current GPS location",
+     * summary="Update the authenticated delivery person's current GPS location (Delivery Role only)",
      * tags={"Deliveries"},
      * security={{"bearerAuth":{}}},
-     * @OA\RequestBody(
-     * required=true,
-     * @OA\JsonContent(
-     * required={"latitude", "longitude"},
-     * @OA\Property(property="latitude", type="number", format="float", example=48.8584),
-     * @OA\Property(property="longitude", type="number", format="float", example=2.2945)
-     * )
-     * ),
+     * @OA\RequestBody(required=true, @OA\JsonContent(required={"latitude", "longitude"}, @OA\Property(property="latitude", type="number"), @OA\Property(property="longitude", type="number"))),
      * @OA\Response(response=200, description="Location updated successfully"),
      * @OA\Response(response=403, description="Forbidden - Delivery role required")
      * )
      */
     public function updateLocation(Request $request)
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = $request->user();
 
-        // Restriction : Seul le rôle DELIVERY
-        if (!$user->isDelivery()) {
+        if (!$user || !$user->isDelivery()) {
             return response()->json(['message' => 'Access denied. Delivery role required.'], 403);
         }
 
@@ -247,17 +248,14 @@ class DeliveryController extends Controller
             'longitude' => 'required|numeric|between:-180,180',
         ]);
         
-        // Utilise l'upsert pour créer/mettre à jour la dernière position de l'utilisateur
-        // Si l'utilisateur existe déjà, la ligne est mise à jour. Sinon, elle est créée.
-        $location = $user->geolocation()->updateOrCreate(
+        // Assurez-vous que l'utilisateur a une relation 'geolocation' dans son modèle
+        $location = DeliveryGeolocation::updateOrCreate(
             ['user_id' => $user->id],
             [
                 'latitude' => $validated['latitude'],
                 'longitude' => $validated['longitude'],
             ]
         );
-
-        // TODO: Implémenter WebSockets/Pusher ici pour notifier l'app Angular en temps réel !
 
         return response()->json([
             'message' => 'Location updated successfully',
@@ -268,22 +266,25 @@ class DeliveryController extends Controller
     /**
      * @OA\Get(
      * path="/api/deliveries/live/map",
-     * summary="Get all active delivery persons' live locations for the admin map",
+     * summary="Get all active delivery persons' live locations for the admin map (Management Roles only)",
      * tags={"Deliveries"},
      * security={{"bearerAuth":{}}},
      * @OA\Response(response=200, description="List of live locations"),
-     * @OA\Response(response=403, description="Forbidden - Admin/Manager role required")
+     * @OA\Response(response=403, description="Forbidden - Management role required")
      * )
      */
-    public function getLiveLocations()
+    public function getLiveLocations(Request $request)
     {
-        // Restriction : Seuls les rôles gérant la logistique (Admin, Manager, Supervisor)
-        if (!auth()->user()->isAdmin() && !auth()->user()->isManager() && !auth()->user()->isSupervisor()) {
-            return response()->json(['message' => 'Access denied.'], 403);
+        /** @var \App\Models\User $authenticatedUser */
+        $authenticatedUser = $request->user();
+
+        if (!$this->checkManagementAccess($authenticatedUser)) {
+            return response()->json(['message' => 'Access denied. Management role required.'], 403);
         }
 
         // Récupère toutes les dernières géolocalisations des utilisateurs qui sont livreurs
-        $liveLocations = \App\Models\DeliveryGeolocation::with('user')
+        // Assurez-vous que le modèle DeliveryGeolocation existe et a la relation 'user'
+        $liveLocations = DeliveryGeolocation::with('user:id,name,role') // Réduit les champs user
             ->whereHas('user', function ($query) {
                 $query->where('role', User::ROLE_DELIVERY);
             })
@@ -295,38 +296,25 @@ class DeliveryController extends Controller
         ]);
     }
 
-
     /**
      * @OA\Post(
      * path="/api/deliveries/{order}/proof",
-     * summary="Uploads the proof of delivery (image/signature/QR) for an order",
+     * summary="Uploads the proof of delivery (image) for an order (Assigned Delivery Role only)",
      * tags={"Deliveries"},
      * security={{"bearerAuth":{}}},
-     * @OA\Parameter(
-     * name="order",
-     * in="path",
-     * required=true,
-     * description="Order ID",
-     * @OA\Schema(type="integer")
-     * ),
-     * @OA\RequestBody(
-     * required=true,
-     * @OA\MediaType(
-     * mediaType="multipart/form-data",
-     * @OA\Schema(
-     * @OA\Property(property="proof_image", type="string", format="binary", description="Image file (photo, signature, or QR)"),
-     * @OA\Property(property="proof_type", type="string", enum={"photo", "signature", "qr"}, example="photo")
-     * )
-     * )
-     * ),
+     * @OA\Parameter(name="order", in="path", required=true, @OA\Schema(type="integer")),
+     * @OA\RequestBody(required=true, @OA\MediaType(mediaType="multipart/form-data", @OA\Schema(
+     * @OA\Property(property="proof_image", type="string", format="binary"),
+     * @OA\Property(property="proof_type", type="string", enum={"photo", "signature", "qr"})
+     * ))),
      * @OA\Response(response=200, description="Proof uploaded successfully"),
      * @OA\Response(response=403, description="Forbidden"),
-     * @OA\Response(response=422, description="Validation error")
      * )
      */
     public function uploadProof(Request $request, Order $order)
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = $request->user();
 
         /// 1. Vérification d'accès : Seul le livreur assigné peut uploader la preuve
         if (!$user || !$user->isDelivery() || $order->delivery_user_id !== $user->id) {
@@ -334,7 +322,7 @@ class DeliveryController extends Controller
         }
         
         // 2. Vérification du statut : On n'upload pas une preuve si c'est déjà livré
-        if ($order->status === 'DELIVERED') {
+        if ($order->status === Order::STATUS_DELIVERED) {
              return response()->json(['message' => 'Order is already marked as delivered.'], 400);
         }
 
@@ -344,40 +332,31 @@ class DeliveryController extends Controller
         ]);
 
         if ($request->hasFile('proof_image')) {
-            // Stocke l'image dans le dossier 'proofs' du disque 'public'
             $path = $request->file('proof_image')->store('proofs', 'public');
             
             // 3. Mise à jour de la commande
             $order->update([
                 'proof_path' => $path,
                 'proof_type' => $validated['proof_type'],
-                // Changement automatique de statut après la preuve
-                'status' => 'DELIVERED', 
+                'status' => Order::STATUS_DELIVERED, 
             ]);
-            
-            // TODO: Émettre un événement WebSocket pour informer Angular que la commande est livrée.
 
             return response()->json([
                 'message' => 'Proof of delivery uploaded successfully.',
-                'data' => $order
+                'data' => new OrderResource($order)
             ]);
         }
         
         return response()->json(['message' => 'Image upload failed.'], 500);
     }
-/**
+
+    /**
      * @OA\Get(
      * path="/api/deliveries/{order}/proof",
-     * summary="Get the delivery proof path (Admin/Manager/Supervisor/Client)",
+     * summary="Get the delivery proof path (Admin/Manager/Supervisor/Client/Assigned Delivery)",
      * tags={"Deliveries"},
      * security={{"bearerAuth":{}}},
-     * @OA\Parameter(
-     * name="order",
-     * in="path",
-     * required=true,
-     * description="Order ID",
-     * @OA\Schema(type="integer")
-     * ),
+     * @OA\Parameter(name="order", in="path", required=true, @OA\Schema(type="integer")),
      * @OA\Response(response=200, description="Proof URL retrieved successfully"),
      * @OA\Response(response=403, description="Forbidden"),
      * @OA\Response(response=404, description="Proof not found")
@@ -385,15 +364,19 @@ class DeliveryController extends Controller
      */
     public function getProof(Order $order)
     {
+        /** @var \App\Models\User $user */
         $user = auth()->user();
 
+        if (!$user) {
+             return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
         // Restriction d'accès :
-        // 1. Admin/Manager/Supervisor peuvent toujours voir
-        // 2. Le Client de la commande peut voir
-        // 3. Le Livreur assigné peut voir
-        $hasAccess = $user->isAdmin() || $user->isManager() || $user->isSupervisor()
-                   || $order->user_id === $user->id // Client
-                   || $order->delivery_user_id === $user->id; // Livreur
+        $isManagement = $this->checkManagementAccess($user);
+        $isClient = $order->user_id === $user->id; 
+        $isAssignedDelivery = $order->delivery_user_id === $user->id;
+
+        $hasAccess = $isManagement || $isClient || $isAssignedDelivery;
 
         if (!$hasAccess) {
             return response()->json(['message' => 'Access denied. You are not authorized to view this proof.'], 403);
@@ -413,45 +396,5 @@ class DeliveryController extends Controller
                 'proof_type' => $order->proof_type,
             ]
         ]);
-    }
-
-    /**
-     * @OA\Get(
-     * path="/api/deliveries/history",
-     * summary="Affiche l'historique des livraisons terminées (Livré, Échec) pour le livreur connecté.",
-     * tags={"Deliveries"},
-     * security={{"bearerAuth":{}}},
-     * @OA\Response(
-     * response=200,
-     * description="Liste des commandes terminées.",
-     * @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/OrderResource"))
-     * ),
-     * @OA\Response(response=401, description="Non authentifié."),
-     * @OA\Response(response=403, description="Accès refusé (non-livreur).")
-     * )
-     */
-    public function getDeliveryHistory(Request $request)
-    {
-        $user = $request->user();
-
-        // Sécurité : S'assurer que seul un livreur peut accéder à cette route
-        if ($user->role !== 'DELIVERY') {
-            return response()->json(['message' => 'Forbidden. Only delivery personnel can access this resource.'], 403);
-        }
-
-        // 1. Définir les statuts considérés comme terminés
-        $finalStatuses = [
-            Order::STATUS_DELIVERED, 
-            Order::STATUS_FAILED,    
-        ];
-
-        // 2. Récupérer l'historique
-        $history = Order::where('delivery_user_id', $user->id)
-                        ->whereIn('status', $finalStatuses)
-                        ->orderByDesc('updated_at')
-                        ->paginate(15); // Pagination recommandée pour les listes
-
-        // 3. Retourner la collection via la ressource
-        return OrderResource::collection($history);
     }
 }

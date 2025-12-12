@@ -106,7 +106,70 @@ class ProductController extends Controller
         }
         return $slug;
     }
-    // ... Les méthodes index(), show(), featured() restent publiques
+    /**
+     * @OA\Get(
+     * path="/api/products",
+     * summary="Get a list of all visible products (Public Access)",
+     * tags={"Products"},
+     * @OA\Parameter(name="search", in="query", @OA\Schema(type="string"), description="Search term for product name/description."),
+     * @OA\Parameter(name="category", in="query", @OA\Schema(type="integer"), description="Filter by category ID."),
+     * @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer", default=10), description="Number of products per page."),
+     * @OA\Response(
+     * response=200,
+     * description="Products retrieved successfully",
+     * @OA\JsonContent(
+     * type="object",
+     * @OA\Property(property="message", type="string", example="Products retrieved successfully"),
+     * @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/ProductsForProduct")),
+     * @OA\Property(property="meta", type="object")
+     * )
+     * )
+     * )
+     */
+    public function index(Request $request)
+    {
+        $query = Product::query();
+        
+        // 1. Filtrage par Visibilité
+        // Seuls les produits visibles sont affichés au public
+        $query->where('is_visible', true);
+        
+        // 2. Filtrage par Catégorie
+        if ($request->has('category')) {
+            $categoryId = $request->query('category');
+            if (Category::where('id', $categoryId)->exists()) {
+                $query->where('category_id', $categoryId);
+            }
+        }
+        
+        // 3. Recherche (par nom ou description)
+        if ($request->has('search')) {
+            $search = $request->query('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+        
+        // 4. Tri par défaut (peut être rendu dynamique)
+        $query->orderBy('is_featured', 'desc') // Les produits mis en avant d'abord
+              ->orderBy('updated_at', 'desc');
+
+        // 5. Pagination
+        $perPage = $request->get('per_page', 10);
+        $products = $query->paginate($perPage);
+
+        return response()->json([
+            'message' => 'Products retrieved successfully',
+            'data' => ProductResource::collection($products->items()),
+            'meta' => [
+                'total' => $products->total(),
+                'per_page' => $products->perPage(),
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+            ]
+        ], 200);
+    }
 
     /**
      * @OA\Post(

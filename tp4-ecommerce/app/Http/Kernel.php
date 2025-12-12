@@ -65,8 +65,12 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         // Nouveaux middlewares
-        'admin' => \App\Http\Middleware\AdminMiddleware::class,
-        'admin_or_vendor' => \App\Http\Middleware\AdminOrVendorMiddleware::class,
+       'role' => \App\Http\Middleware\RoleMiddleware::class, 
+        
+        // Si vous ne les utilisez plus, vous pouvez supprimer/commenter ceux-ci :
+        // 'admin' => \App\Http\Middleware\AdminMiddleware::class, 
+        // 'admin_or_vendor' => \App\Http\Middleware\AdminOrVendorMiddleware::class,
+        
          'auth:sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
     ];
 }
