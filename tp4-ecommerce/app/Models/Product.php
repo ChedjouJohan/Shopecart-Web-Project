@@ -76,6 +76,18 @@ class Product extends Model
         'discount_percentage'
     ];
 
+    
+
+
+
+      /**
+     * Get the variants for the product.
+     */
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
     /**
      * Mutator: Assure que le slug est généré automatiquement si non fourni.
      * @param string $value
