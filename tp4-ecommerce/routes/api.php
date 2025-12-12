@@ -13,6 +13,7 @@ use App\Http\Controllers\ProductVariantController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DeliveryController;
+use App\Http\Controllers\Api\DashboardController;
 
 
 /*
@@ -128,6 +129,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ========== ORDER ROUTES ==========
     Route::get('/orders', [OrderController::class, 'index']);
     Route::post('/orders', [OrderController::class, 'store']);
+    Route::get('orders/my', [OrderController::class, 'myOrders']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
     
     // ========== PAYMENT ROUTES ==========
@@ -140,6 +142,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/products/vendor/my-products', [ProductController::class, 'myProducts']);
     
     // ========== ADMIN ONLY ROUTES ==========
+    Route::put('orders/{order}/status', [OrderController::class, 'updateStatus'])
+    ->middleware(['auth:sanctum', 'role:ADMIN,MANAGER,SUPERVISOR']);
+
+     // === ROUTES ADMIN SEULEMENT ===
     Route::middleware('admin')->group(function () {
         // User Management
         Route::apiResource('users', UserController::class);
@@ -152,6 +158,16 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     
     // ========== ADMIN OR VENDOR ROUTES ==========
+
+    // --- API DASHBOARD ET RAPPORTS (Réservé aux Rôles de Gestion) ---
+    // Vous pouvez ajouter un middleware 'role:admin,manager,supervisor' ici si vous l'avez
+    Route::prefix('dashboard')->controller(DashboardController::class)->group(function () {
+        Route::get('kpis', 'getKpis');
+        Route::get('sales-over-time', 'getSalesOverTime');
+        Route::get('top-products', 'getTopProducts');
+        Route::get('order-status-distribution', 'getOrderStatusDistribution');
+    });
+
     Route::prefix('deliveries')->controller(DeliveryController::class)->group(function () {
         // Routes Administration (Angular)
         Route::get('pending', 'getPendingDeliveries');
@@ -169,6 +185,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Preuve de livraison (React Native)
         Route::post('{order}/proof', 'uploadProof');
+        Route::get('{order}/proof', 'getProof');
+
+        // Notifications Push - Enregistrement du Token FCM
+    Route::post('user/fcm-token', [UserController::class, 'updateFcmToken']);
+
+    // Historique des Livraisons
+    Route::get('deliveries/history', [DeliveryController::class, 'getDeliveryHistory']);
     });
 
     // === ROUTES ADMIN OU VENDEUR ===

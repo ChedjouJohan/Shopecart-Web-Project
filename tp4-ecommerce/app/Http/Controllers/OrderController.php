@@ -6,10 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Cart;
 use App\Http\Resources\OrderResource;
-use App\Http\Resources\OrderCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\UpdateOrderStatusRequest;
 
 /**
  * @OA\Tag(
@@ -39,31 +39,39 @@ class OrderController extends Controller
      */
     public function index()
     {
+        if (!auth()->check()) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
         try{
             $orders = Order::where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        if ($orders ->isEmpty()){
-
+       if ($orders->isEmpty()){
+                return response()->json([
+                    'message' => 'No orders found for this user.',
+                    'data' => [],
+                    'total' => 0
+                ], 200);
+            }
             
+            // Format de réponse minimal
             return response()->json([
-                'status' => 'succes',
-                'data' => [],
-                'message' => 'commande non trouvee',
-                'code' => 200
-            ],200);
-        }
-        return new OrderCollection($orders);
+                'message' => 'Orders retrieved successfully',
+                'data' => OrderResource::collection($orders->items()),
+                'total' => $orders->total(),
+                'per_page' => $orders->perPage(),
+                'current_page' => $orders->currentPage(),
+            ], 200);
 
         }
         catch (\Exception $e){
-
-            return response()->json(['status' => 'error', 'message' => 'Erreur serveur', 'code' => 500], 500);
-
+            // Utilisez le message d'erreur pour le débogage, mais un message générique pour le client
+            return response()->json([
+                'message' => 'Erreur server while retrieving orders.',
+                'error_detail' => $e->getMessage()
+            ], 500);
         }
-
-       
     }
 
     /**
@@ -107,14 +115,14 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        $cart = $this->getCurrentCart($request);
+       $cart = $this->getCurrentCart($request);
+        $userId = auth()->id();
 
         if (!$cart || $cart->items_count === 0) {
             return response()->json([
-                'message' => 'Your cart is empty'
+                'message' => 'Your cart is empty or could not be found.'
             ], 422);
         }
-
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email',
@@ -131,10 +139,11 @@ class OrderController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        // --- 2. Vérification des stocks ---
         foreach ($cart->items as $item) {
             if ($item->quantity > $item->product->stock) {
                 return response()->json([
-                    'message' => "Product {$item->product->name} does not have enough stock"
+                    'message' => "Product {$item->product->name} does not have enough stock. Available: {$item->product->stock}, Requested: {$item->quantity}."
                 ], 422);
             }
         }
@@ -142,17 +151,24 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
+           // Déterminer le statut initial
+            $initialStatus = ($validated['payment_method'] === 'cash_on_delivery') ? 'PENDING' : 'PENDING_PAYMENT';
+
+            // --- 3. Création de l'entête de commande ---
             $order = Order::create([
                 'order_number' => 'ORD-' . date('Ymd') . '-' . Str::random(6),
-                'status' => 'pending',
+                'status' => $initialStatus, // Statut initial
                 'subtotal' => $cart->total,
-                'shipping' => 0,
-                'tax' => 0,
-                'total' => $cart->total,
-                'user_id' => auth()->id(),
+                // TODO: Calculer la livraison et la taxe ici si elles ne sont pas nulles.
+                'shipping' => 0.00, 
+                'tax' => 0.00,
+                'total' => $cart->total, // Total simple pour l'instant (subtotal + shipping + tax)
+                'user_id' => $userId,
+                // Informations Client
                 'customer_email' => $validated['customer_email'],
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'],
+                // Adresses
                 'shipping_address' => $validated['shipping_address'],
                 'shipping_city' => $validated['shipping_city'],
                 'shipping_zipcode' => $validated['shipping_zipcode'],
@@ -164,8 +180,9 @@ class OrderController extends Controller
                 'payment_method' => $validated['payment_method'],
                 'notes' => $validated['notes'] ?? null,
             ]);
-
+           // --- 4. Transfert des articles et mise à jour des stocks ---
             foreach ($cart->items as $cartItem) {
+                // Création de l'article de commande
                 $order->items()->create([
                     'product_id' => $cartItem->product_id,
                     'quantity' => $cartItem->quantity,
@@ -175,30 +192,95 @@ class OrderController extends Controller
                     'product_sku' => $cartItem->product->sku,
                 ]);
 
+                // Décrémentation du stock
                 $cartItem->product->decrement('stock', $cartItem->quantity);
             }
-
+          // --- 5. Nettoyage du panier ---
             $cart->items()->delete();
-            $this->updateCartTotals($cart);
+            $this->updateCartTotals($cart); // Met à jour les totaux du panier à zéro
 
             DB::commit();
 
-            $order->load('items.product');
+            // --- 6. Réponse Client (Minimaliste) ---
+            $order->load(['items.product', 'deliveryUser']); // Chargement des relations pour la ressource
 
             return response()->json([
-                'message' => 'Order created successfully',
-                'order' => new OrderResource($order)
+                'message' => 'Order created successfully. Status: ' . $initialStatus,
+                'data' => new OrderResource($order)
             ], 201);
 
-        } catch (\Exception $e) {
+     } catch (\Exception $e) {
             DB::rollBack();
             
             return response()->json([
-                'message' => 'Error creating order: ' . $e->getMessage()
+                'message' => 'An error occurred during the checkout process.',
+                'error_detail' => $e->getMessage()
             ], 500);
         }
     }
+    /**
+     * @OA\Put(
+     * path="/api/orders/{order}/status",
+     * summary="Update the status of a specific order (Management Only)",
+     * tags={"Orders"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Parameter(
+     * name="order",
+     * in="path",
+     * required=true,
+     * @OA\Schema(type="integer"),
+     * description="ID of the order to update"
+     * ),
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * @OA\Property(property="status", type="string", description="New status for the order", enum={"PENDING", "PROCESSING", "PAID", "SHIPPED", "DELIVERED", "CANCELED", "FAILED", "IN_DELIVERY"})
+     * )
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Order status updated successfully",
+     * @OA\JsonContent(
+     * @OA\Property(property="message", type="string", example="Order status updated to SHIPPED"),
+     * @OA\Property(property="data", ref="#/components/schemas/Order")
+     * )
+     * ),
+     * @OA\Response(response=403, description="Forbidden - Only management roles can update status"),
+     * @OA\Response(response=404, description="Order not found"),
+     * @OA\Response(response=422, description="Validation error")
+     * )
+     */
+    public function updateStatus(UpdateOrderStatusRequest $request, Order $order)
+    {
+        // La validation d'accès (authorize) et des données est faite par UpdateOrderStatusRequest
 
+        try {
+            DB::beginTransaction();
+
+            $newStatus = $request->validated('status');
+            $order->status = $newStatus;
+            $order->save();
+
+            // Logique supplémentaire selon le statut (ex: envoyer un email)
+            // if ($newStatus === Order::STATUS_SHIPPED) { 
+            //     // Envoi de notification au client
+            // }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => "Order status updated to {$newStatus}",
+                'data' => $order,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to update order status.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     /**
      * @OA\Get(
      *     path="/api/orders/{id}",
@@ -256,5 +338,47 @@ class OrderController extends Controller
             'items_count' => $cart->items->sum('quantity'),
             'total' => $cart->items->sum('total')
         ]);
+    }
+
+    /**
+     * @OA\Get(
+     * path="/api/orders/my",
+     * summary="Get list of orders for the authenticated user (Client Only)",
+     * tags={"Orders"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Parameter(name="status", in="query", @OA\Schema(type="string"), description="Filter by order status"),
+     * @OA\Response(
+     * response=200,
+     * description="User's orders retrieved successfully",
+     * @OA\JsonContent(
+     * @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/OrderResource")),
+     * )
+     * ),
+     * @OA\Response(response=401, description="Unauthenticated"),
+     * @OA\Response(response=404, description="No orders found")
+     * )
+     */
+    public function myOrders(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
+        // Si l'utilisateur n'est pas authentifié, la route ne devrait pas être atteinte, mais on vérifie
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        // Commence la requête pour les commandes de l'utilisateur
+        $query = $user->orders()->latest(); // Assuming a 'orders()' relationship exists in User model
+
+        // Filtrage optionnel par statut
+        if ($request->has('status')) {
+            $query->where('status', $request->query('status'));
+        }
+
+        // Récupération et pagination des commandes
+        $orders = $query->paginate(15); 
+
+        return OrderResource::collection($orders);
     }
 }

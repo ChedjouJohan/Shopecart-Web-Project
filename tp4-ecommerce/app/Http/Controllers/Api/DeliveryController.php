@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\OrderResource;
 
 /**
  * @OA\Tag(
@@ -326,9 +328,14 @@ class DeliveryController extends Controller
     {
         $user = auth()->user();
 
-        // Restriction : Seul le livreur assigné peut uploader la preuve
-        if (!$user->isDelivery() || $order->delivery_user_id !== $user->id) {
+        /// 1. Vérification d'accès : Seul le livreur assigné peut uploader la preuve
+        if (!$user || !$user->isDelivery() || $order->delivery_user_id !== $user->id) {
             return response()->json(['message' => 'Access denied. Not the assigned delivery person.'], 403);
+        }
+        
+        // 2. Vérification du statut : On n'upload pas une preuve si c'est déjà livré
+        if ($order->status === 'DELIVERED') {
+             return response()->json(['message' => 'Order is already marked as delivered.'], 400);
         }
 
         $validated = $request->validate([
@@ -340,17 +347,111 @@ class DeliveryController extends Controller
             // Stocke l'image dans le dossier 'proofs' du disque 'public'
             $path = $request->file('proof_image')->store('proofs', 'public');
             
+            // 3. Mise à jour de la commande
             $order->update([
                 'proof_path' => $path,
                 'proof_type' => $validated['proof_type'],
-                'status' => 'DELIVERED', // Optionnel : Marquer comme livré après la preuve, ou le laisser en 'EN_ROUTE'
+                // Changement automatique de statut après la preuve
+                'status' => 'DELIVERED', 
+            ]);
+            
+            // TODO: Émettre un événement WebSocket pour informer Angular que la commande est livrée.
+
+            return response()->json([
+                'message' => 'Proof of delivery uploaded successfully.',
+                'data' => $order
             ]);
         }
+        
+        return response()->json(['message' => 'Image upload failed.'], 500);
+    }
+/**
+     * @OA\Get(
+     * path="/api/deliveries/{order}/proof",
+     * summary="Get the delivery proof path (Admin/Manager/Supervisor/Client)",
+     * tags={"Deliveries"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Parameter(
+     * name="order",
+     * in="path",
+     * required=true,
+     * description="Order ID",
+     * @OA\Schema(type="integer")
+     * ),
+     * @OA\Response(response=200, description="Proof URL retrieved successfully"),
+     * @OA\Response(response=403, description="Forbidden"),
+     * @OA\Response(response=404, description="Proof not found")
+     * )
+     */
+    public function getProof(Order $order)
+    {
+        $user = auth()->user();
+
+        // Restriction d'accès :
+        // 1. Admin/Manager/Supervisor peuvent toujours voir
+        // 2. Le Client de la commande peut voir
+        // 3. Le Livreur assigné peut voir
+        $hasAccess = $user->isAdmin() || $user->isManager() || $user->isSupervisor()
+                   || $order->user_id === $user->id // Client
+                   || $order->delivery_user_id === $user->id; // Livreur
+
+        if (!$hasAccess) {
+            return response()->json(['message' => 'Access denied. You are not authorized to view this proof.'], 403);
+        }
+
+        if (!$order->proof_path) {
+            return response()->json(['message' => 'Delivery proof not yet available for this order.'], 404);
+        }
+
+        // Retourne le chemin complet pour accéder à l'image via le lien symbolique
+        $proofUrl = Storage::url($order->proof_path);
 
         return response()->json([
-            'message' => 'Proof of delivery uploaded successfully.',
-            'data' => $order
+            'message' => 'Delivery proof path retrieved successfully.',
+            'data' => [
+                'proof_url' => asset($proofUrl),
+                'proof_type' => $order->proof_type,
+            ]
         ]);
     }
 
+    /**
+     * @OA\Get(
+     * path="/api/deliveries/history",
+     * summary="Affiche l'historique des livraisons terminées (Livré, Échec) pour le livreur connecté.",
+     * tags={"Deliveries"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Response(
+     * response=200,
+     * description="Liste des commandes terminées.",
+     * @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/OrderResource"))
+     * ),
+     * @OA\Response(response=401, description="Non authentifié."),
+     * @OA\Response(response=403, description="Accès refusé (non-livreur).")
+     * )
+     */
+    public function getDeliveryHistory(Request $request)
+    {
+        $user = $request->user();
+
+        // Sécurité : S'assurer que seul un livreur peut accéder à cette route
+        if ($user->role !== 'DELIVERY') {
+            return response()->json(['message' => 'Forbidden. Only delivery personnel can access this resource.'], 403);
+        }
+
+        // 1. Définir les statuts considérés comme terminés
+        $finalStatuses = [
+            Order::STATUS_DELIVERED, 
+            Order::STATUS_FAILED,    
+        ];
+
+        // 2. Récupérer l'historique
+        $history = Order::where('delivery_user_id', $user->id)
+                        ->whereIn('status', $finalStatuses)
+                        ->orderByDesc('updated_at')
+                        ->paginate(15); // Pagination recommandée pour les listes
+
+        // 3. Retourner la collection via la ressource
+        return OrderResource::collection($history);
+    }
 }

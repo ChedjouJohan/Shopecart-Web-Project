@@ -30,24 +30,25 @@ use Illuminate\Database\Eloquent\Builder; // Import de Builder pour le type hint
  * format="email",
  * description="Adresse email unique"
  * ),
- * * @OA\Property(
+ * @OA\Property(
  * property="phone",
  * type="string",
  * format="string",
- * description="Numero de telephone"
+ * description="Numero de telephone",
+ * nullable=true
  * ),
- * * @OA\Property(
+ * @OA\Property(
  * property="address",
  * type="string",
  * format="string",
- * description="Adresse"
+ * description="Adresse",
+ * nullable=true
  * ),
- * 
  * @OA\Property(
  * property="role",
  * type="string",
- * description="Rôle de l'utilisateur (ex: USER, ADMIN)",
- * enum={"USER", "ADMIN", "VENDOR", "CLIENT", "DELIVERY", "MANAGER", "SUPERVISOR"}
+ * description="Rôle de l'utilisateur",
+ * enum={"ADMIN", "VENDOR", "CUSTOMER", "DELIVERY", "MANAGER", "SUPERVISOR"}
  * ),
  * @OA\Property(
  * property="created_at",
@@ -62,18 +63,32 @@ use Illuminate\Database\Eloquent\Builder; // Import de Builder pour le type hint
  * description="Date de dernière mise à jour"
  * )
  * )
+ *
+ * @OA\Schema(
+ * schema="UserResource",
+ * title="User Resource",
+ * description="Structure de données utilisateur utilisée dans les réponses API (masque le mot de passe)",
+ * @OA\Property(property="id", type="integer", example=1),
+ * @OA\Property(property="name", type="string", example="Alice Smith"),
+ * @OA\Property(property="email", type="string", format="email", example="alice@example.com"),
+ * @OA\Property(property="role", type="string", enum={"ADMIN", "VENDOR", "CUSTOMER", "DELIVERY", "MANAGER", "SUPERVISOR"}, example="CUSTOMER"),
+ * @OA\Property(property="phone", type="string", nullable=true, example="+33612345678"),
+ * @OA\Property(property="address", type="string", nullable=true, example="123 Rue de la Liberté"),
+ * @OA\Property(property="created_at", type="string", format="date-time"),
+ * @OA\Property(property="updated_at", type="string", format="date-time")
+ * )
  */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    // Définition des constantes de rôles
-    const ROLE_ADMIN = 'ADMIN';
-    const ROLE_VENDOR = 'VENDOR';
-    const ROLE_CLIENT = 'CUSTOMER';
-    const ROLE_DELIVERY = 'DELIVERY';
-    const ROLE_MANAGER = 'MANAGER';
-    const ROLE_SUPERVISOR = 'SUPERVISOR';
+    // Définition des constantes de rôles (Utilisation de 'CUSTOMER' au lieu de 'CLIENT' pour la cohérence avec votre constante)
+    public const ROLE_ADMIN = 'ADMIN';
+    public const ROLE_VENDOR = 'VENDOR';
+    public const ROLE_CLIENT = 'CUSTOMER'; // La constante ROLE_CLIENT est 'CUSTOMER'
+    public const ROLE_DELIVERY = 'DELIVERY';
+    public const ROLE_MANAGER = 'MANAGER';
+    public const ROLE_SUPERVISOR = 'SUPERVISOR';
 
     /**
      * The attributes that are mass assignable.
@@ -110,6 +125,7 @@ class User extends Authenticatable
         'role' => 'string',
     ];
 
+    // --- RELATIONS ---
 
     public function carts()
     {
@@ -121,17 +137,25 @@ class User extends Authenticatable
         return $this->hasMany(Order::class);
     }
 
-    // public function notifications()
-    // {
-    //     return $this->hasMany(Notification::class);
-    // }
+    public function geolocation()
+    {
+        // Supposons que DeliveryGeolocation existe
+        return $this->hasOne(DeliveryGeolocation::class);
+    }
 
-    // Méthode utilitaire pour obtenir le panier actif
+    // --- UTILITAIRES / ACCESSEURS ---
+
+    /**
+     * Méthode utilitaire pour obtenir le panier actif (si le modèle Cart est bien défini).
+     */
     public function cart()
     {
         return $this->carts()->latest()->first();
     }
-     public function isAdmin(): bool
+    
+    // --- VÉRIFICATIONS DE RÔLES ---
+
+    public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
     }
@@ -148,7 +172,7 @@ class User extends Authenticatable
 
     public function isClient(): bool
     {
-        // Utilise la constante ROLE_CLIENT (CUSTOMER)
+        // Utilise la constante ROLE_CLIENT ('CUSTOMER')
         return $this->role === self::ROLE_CLIENT; 
     }
 
@@ -160,6 +184,8 @@ class User extends Authenticatable
     {
         return $this->role === self::ROLE_MANAGER;
     }
+
+    // --- SCOPES ---
 
     /**
      * Scope pour filtrer par rôle (méthode scope[NomDuScope])
@@ -183,11 +209,10 @@ class User extends Authenticatable
 
     public function scopeClients(Builder $query): Builder
     {
-        // Utilise la constante ROLE_CLIENT (CUSTOMER)
+        // Utilise la constante ROLE_CLIENT ('CUSTOMER')
         return $query->where('role', self::ROLE_CLIENT); 
     }
     
-    // NOUVEAUX SCOPES AJOUTÉS
     public function scopeManagers(Builder $query): Builder
     {
         return $query->where('role', self::ROLE_MANAGER);
@@ -197,12 +222,4 @@ class User extends Authenticatable
     {
         return $query->where('role', self::ROLE_SUPERVISOR);
     }
-
-    /**
- * L'utilisateur a une (dernière) géolocalisation.
- */
-public function geolocation()
-{
-    return $this->hasOne(DeliveryGeolocation::class);
-}
 }
