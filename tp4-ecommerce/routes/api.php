@@ -115,7 +115,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('sales-over-time', 'getSalesOverTime');
         Route::get('top-products', 'getTopProducts');
         Route::get('order-status-distribution', 'getOrderStatusDistribution');
+    });  
+    
+    // Notifications Push - Enregistrement du Token FCM
+    Route::post('user/fcm-token', [UserController::class, 'updateFcmToken']);
+
+    // Historique des Livraisons
+    Route::get('deliveries/history', [DeliveryController::class, 'getDeliveryHistory']);
     });
+
+
 
     Route::prefix('deliveries')->controller(DeliveryController::class)->group(function () {
         // Routes Administration (Angular)
@@ -136,13 +145,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('{order}/proof', 'uploadProof');
         Route::get('{order}/proof', 'getProof');
 
-        // Notifications Push - Enregistrement du Token FCM
-    Route::post('user/fcm-token', [UserController::class, 'updateFcmToken']);
-
-    // Historique des Livraisons
-    Route::get('deliveries/history', [DeliveryController::class, 'getDeliveryHistory']);
-    });
-
+    
     // === ROUTES ADMIN OU VENDEUR ===
     Route::middleware('admin_or_vendor')->group(function () {
         // Gestion des produits (Admin et Vendeurs)
