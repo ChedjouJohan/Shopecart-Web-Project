@@ -125,7 +125,7 @@ curl -X 'DELETE' \
   'http://localhost:8000/api/categories/3' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer ${ADMIN_TOKEN}"
-```
+```****
 
 -----
 

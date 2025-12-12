@@ -43,6 +43,9 @@ Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::get('/categories/{category}/products', [CategoryController::class, 'products']);
 
+Route::get('/products/{product}/variants', [ProductVariantController::class, 'index']);
+
+
 // --- PANIER NON AUTHENTIFIÉ (Si supporté) ---
 // Note: Ces routes sont souvent obsolètes ou fusionnées avec le panier authentifié.
 Route::prefix("cart")->group(function(){
@@ -136,6 +139,10 @@ Route::middleware(['auth:sanctum', 'role:ADMIN,MANAGER,SUPERVISOR'])->group(func
     // Gestion des Utilisateurs (API Resource)
     Route::apiResource('users', UserController::class); // Index, Store, Show, Update, Destroy
     Route::get('/users/roles/stats', [UserController::class, 'roleStats']);
+
+    // --- G. LECTURE DES ARTICLES DE PANIER D'AUTRUI (ADMIN/MANAGER) ---
+    // GET /api/cartItems/cart/{cartId} (Récupère les items de N'IMPORTE QUEL panier)
+    Route::get('cartItems/cart/{cartId}', [CartItemController::class, 'getAllCartItems']);
 });
 
 
@@ -158,8 +165,32 @@ Route::middleware(['auth:sanctum', 'role:ADMIN,VENDOR'])->group(function () {
     Route::prefix('products/{product}/variants')->group(function () {
         Route::post('/', [ProductVariantController::class, 'store']);
     });
+
     Route::prefix('variants')->group(function () {
         Route::put('/{variant}', [ProductVariantController::class, 'update']);
         Route::delete('/{variant}', [ProductVariantController::class, 'destroy']);
     });
+
+    // --- F. GESTION GRANULAIRE DES ARTICLES DE PANIER (CartItemController) ---
+    // Ces routes peuvent être utilisées par les clients pour accéder à leurs propres articles/paniers.
+    Route::prefix('cartItems')->controller(CartItemController::class)->group(function () {
+        
+        // 1. Lire un article spécifique (utilisé par le client pour vérifier un de SES articles)
+        // GET /api/cartItems/{cartItemId}
+        Route::get('{cartItemId}', 'getCartItem'); 
+        
+        // 2. Ajouter/Créer un article (Utilisé si on passe l'ID du panier au lieu d'utiliser /api/cart/add)
+        // POST /api/cartItems (Attention: redondant avec /api/cart/add, mais permet de spécifier cart_id)
+        // Si ces méthodes sont utilisées par le client, elles doivent impérativement vérifier que le cart_id appartient au user.
+        Route::post('/', 'addCartItem');
+
+        // 3. Mettre à jour un article (Attention: redondant avec /api/cart/items/{cartItem})
+        // PUT /api/cartItems/{cartItemId}
+        Route::put('{cartItemId}', 'updateCartItem');
+
+        // 4. Supprimer un article (Attention: redondant avec /api/cart/items/{cartItem})
+        // DELETE /api/cartItems/{cartItemId}
+        Route::delete('{cartItemId}', 'deleteCartItem');
+    });
 });
+

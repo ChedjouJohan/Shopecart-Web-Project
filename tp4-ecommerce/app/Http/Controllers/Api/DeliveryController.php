@@ -57,7 +57,7 @@ class DeliveryController extends Controller
         // Filtre : Commandes payées et non encore assignées à un livreur
         $pendingOrders = Order::whereNull('delivery_user_id')
                               // Assurez-vous que ces constantes de statut existent dans votre modèle Order
-                              ->whereIn('status', [Order::STATUS_PAID, Order::STATUS_READY_TO_SHIP ?? Order::STATUS_PAID])
+                              ->whereIn('status', [Order::STATUS_PAID, Order::STATUS_PENDING_PAYMENT ?? Order::STATUS_PAID])
                               ->orderBy('created_at', 'asc')
                               ->get();
 
