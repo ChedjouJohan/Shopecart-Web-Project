@@ -1,0 +1,119 @@
+<div class="form-container">
+  <div class="header">
+    <h1 class="page-title">{{ title }}</h1>
+  </div>
+
+  <mat-card class="form-card">
+    <mat-card-content>
+      <div *ngIf="loading && !productForm.value.name" class="loading-container">
+        <mat-spinner></mat-spinner>
+      </div>
+
+      <div *ngIf="error" class="error-message">
+        <mat-icon>error</mat-icon>
+        <span>{{ error }}</span>
+      </div>
+
+      <form [formGroup]="productForm" (ngSubmit)="onSubmit()" *ngIf="!loading || productForm.value.name">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nom du produit</mat-label>
+            <input matInput formControlName="name" required />
+            <mat-error *ngIf="productForm.get('name')?.hasError('required')">
+              Le nom est requis
+            </mat-error>
+            <mat-error *ngIf="productForm.get('name')?.hasError('maxlength')">
+              Le nom ne peut pas dépasser 255 caractères
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="4"></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Prix (XAF)</mat-label>
+            <input matInput type="number" formControlName="price" required />
+            <mat-error *ngIf="productForm.get('price')?.hasError('required')">
+              Le prix est requis
+            </mat-error>
+            <mat-error *ngIf="productForm.get('price')?.hasError('min')">
+              Le prix doit être positif
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Prix de comparaison (XAF)</mat-label>
+            <input matInput type="number" formControlName="compare_price" />
+            <mat-hint>Prix barré affiché si supérieur au prix</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Stock</mat-label>
+            <input matInput type="number" formControlName="stock" required />
+            <mat-error *ngIf="productForm.get('stock')?.hasError('required')">
+              Le stock est requis
+            </mat-error>
+            <mat-error *ngIf="productForm.get('stock')?.hasError('min')">
+              Le stock doit être positif
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>SKU</mat-label>
+            <input matInput formControlName="sku" />
+            <mat-hint>Code produit unique</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Catégorie</mat-label>
+            <mat-select formControlName="category_id">
+              <mat-option [value]="null">Aucune catégorie</mat-option>
+              <mat-option *ngFor="let category of categories" [value]="category.id">
+                {{ category.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row checkboxes">
+          <mat-checkbox formControlName="is_visible">
+            Produit visible
+          </mat-checkbox>
+          <mat-checkbox formControlName="is_featured">
+            Produit en vedette
+          </mat-checkbox>
+        </div>
+
+        <div class="form-actions">
+          <button
+            mat-button
+            type="button"
+            (click)="cancel()"
+            [disabled]="loading"
+          >
+            Annuler
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="productForm.invalid || loading"
+          >
+            <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+            <span *ngIf="!loading">{{ isEditMode ? 'Modifier' : 'Créer' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

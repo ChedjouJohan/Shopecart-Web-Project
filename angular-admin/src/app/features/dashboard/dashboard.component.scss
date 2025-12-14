@@ -1,0 +1,143 @@
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem;
+  gap: 1rem;
+
+  mat-icon {
+    font-size: 3rem;
+    width: 3rem;
+    height: 3rem;
+    color: #f44336;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: #666;
+  }
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .kpi-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .kpi-info {
+      .kpi-title {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #666;
+        margin: 0 0 0.5rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .kpi-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #333;
+        margin: 0;
+      }
+    }
+
+    .kpi-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+
+      mat-icon {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+  }
+}
+
+.additional-stats {
+  margin-top: 2rem;
+
+  .stats-card {
+    padding: 1.5rem;
+
+    mat-card-header {
+      margin-bottom: 1.5rem;
+
+      mat-card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem 0;
+      border-bottom: 1px solid #e0e0e0;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .stat-label {
+        font-size: 1rem;
+        color: #666;
+      }
+
+      .stat-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+
+        &.success {
+          color: #4caf50;
+        }
+
+        &.error {
+          color: #f44336;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
